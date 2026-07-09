@@ -1,0 +1,796 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>初中全科闯关学习小程序</title>
+  <style>
+    :root {
+      --ink: #142033;
+      --muted: #667085;
+      --line: #d8e0ea;
+      --paper: #f7fafc;
+      --blue: #2563eb;
+      --green: #0f9f6e;
+      --red: #dc3d43;
+      --amber: #d97706;
+      --violet: #6d5bd0;
+      --shadow: 0 14px 38px rgba(20, 32, 48, .12);
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 12% 12%, rgba(37, 99, 235, .13), transparent 26%),
+        radial-gradient(circle at 88% 10%, rgba(15, 159, 110, .12), transparent 24%),
+        linear-gradient(135deg, #eef7ff 0%, #f8fbf3 55%, #fff7ed 100%);
+      font-family: "Microsoft YaHei", "PingFang SC", "Segoe UI", sans-serif;
+      letter-spacing: 0;
+    }
+
+    button { cursor: pointer; font: inherit; }
+    h1, h2, h3, p { margin: 0; }
+
+    .app {
+      width: min(1220px, calc(100% - 32px));
+      min-height: 100vh;
+      margin: 0 auto;
+      padding: 24px 0;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      gap: 18px;
+    }
+
+    header, .brand, .actions, .tabs, .controls, .meta {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    header { justify-content: space-between; }
+    .brand { min-width: 0; }
+    .logo {
+      width: 48px;
+      height: 48px;
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
+      color: #fff;
+      background: var(--ink);
+      box-shadow: var(--shadow);
+      flex: 0 0 auto;
+    }
+
+    .logo svg { width: 28px; height: 28px; }
+    h1 { font-size: 24px; line-height: 1.2; }
+    .subtitle { margin-top: 4px; color: var(--muted); font-size: 14px; }
+
+    .icon-btn, .tab-btn, .primary, .secondary, .subject-btn, .unit-btn, .choice {
+      border-radius: 8px;
+      transition: .16s ease;
+    }
+
+    .icon-btn {
+      width: 42px;
+      height: 42px;
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, .88);
+      color: var(--ink);
+      display: grid;
+      place-items: center;
+    }
+
+    .icon-btn svg { width: 22px; height: 22px; }
+    .icon-btn:hover, .tab-btn:hover, .primary:hover, .secondary:hover, .subject-btn:hover, .unit-btn:hover, .choice:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 10px 24px rgba(20, 32, 48, .14);
+    }
+
+    main {
+      display: grid;
+      grid-template-columns: 300px minmax(0, 1fr);
+      gap: 18px;
+      min-height: 0;
+    }
+
+    .panel {
+      border: 1px solid rgba(216, 224, 234, .9);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, .88);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(8px);
+    }
+
+    .sidebar {
+      padding: 16px;
+      display: grid;
+      gap: 16px;
+      align-content: start;
+    }
+
+    .stat-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .stat {
+      min-height: 72px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 10px;
+      background: #fff;
+    }
+
+    .stat b { display: block; font-size: 22px; line-height: 1.15; }
+    .stat span, .muted { color: var(--muted); font-size: 12px; }
+
+    .subject-list, .unit-list, .record-list, .review-list {
+      display: grid;
+      gap: 8px;
+    }
+
+    .subject-btn, .unit-btn {
+      min-height: 44px;
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--ink);
+      text-align: left;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .subject-btn.active, .unit-btn.active {
+      color: var(--blue);
+      border-color: var(--blue);
+      box-shadow: inset 3px 0 0 var(--blue);
+    }
+
+    .badge {
+      border-radius: 999px;
+      padding: 3px 8px;
+      color: #fff;
+      background: var(--green);
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    .stage {
+      min-height: 690px;
+      display: grid;
+      grid-template-rows: auto 1fr;
+      overflow: hidden;
+    }
+
+    .hero {
+      min-height: 188px;
+      padding: 24px;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 260px;
+      align-items: center;
+      gap: 18px;
+      color: #fff;
+      background: linear-gradient(120deg, rgba(20, 32, 51, .96), rgba(37, 99, 235, .78)), #142033;
+    }
+
+    .hero h2 { font-size: 34px; line-height: 1.14; max-width: 720px; }
+    .hero p { margin-top: 12px; max-width: 720px; color: rgba(255, 255, 255, .78); line-height: 1.7; }
+    .scene svg { width: 100%; max-width: 260px; display: block; justify-self: end; }
+
+    .content {
+      padding: 18px;
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr);
+      gap: 16px;
+    }
+
+    .tabs { flex-wrap: wrap; }
+    .tab-btn {
+      min-height: 40px;
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--ink);
+      padding: 8px 13px;
+      font-weight: 800;
+    }
+
+    .tab-btn.active { color: #fff; border-color: var(--blue); background: var(--blue); }
+
+    .view {
+      display: none;
+      gap: 16px;
+      align-content: start;
+    }
+
+    .view.show { display: grid; }
+
+    .unit-card, .lesson-card, .exam-card, .record {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      padding: 14px;
+    }
+
+    .unit-card {
+      display: grid;
+      gap: 10px;
+    }
+
+    .unit-card h3 { font-size: 20px; }
+    .knowledge {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .point {
+      border-left: 4px solid var(--blue);
+      border-radius: 8px;
+      background: var(--paper);
+      padding: 10px 12px;
+      line-height: 1.6;
+    }
+
+    .play {
+      display: grid;
+      grid-template-rows: auto auto minmax(0, 1fr) auto auto;
+      gap: 14px;
+    }
+
+    .meter-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .progress {
+      height: 12px;
+      border-radius: 999px;
+      background: #e7edf4;
+      overflow: hidden;
+    }
+
+    .progress span {
+      display: block;
+      height: 100%;
+      width: 0;
+      background: linear-gradient(90deg, var(--green), var(--blue));
+      transition: width .25s ease;
+    }
+
+    .counter { color: var(--muted); font-weight: 800; white-space: nowrap; }
+
+    .lesson-card {
+      display: grid;
+      gap: 10px;
+      background: var(--paper);
+    }
+
+    .meta { flex-wrap: wrap; color: var(--muted); font-size: 13px; }
+    .pill { border: 1px solid var(--line); border-radius: 999px; padding: 5px 9px; background: #fff; }
+    .mission { color: var(--amber); font-weight: 800; }
+    .question { font-size: 27px; line-height: 1.38; font-weight: 800; overflow-wrap: anywhere; }
+    .teach { border-left: 4px solid var(--violet); border-radius: 8px; padding: 10px 12px; background: #f4f1ff; line-height: 1.65; }
+
+    .choices {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      align-content: start;
+    }
+
+    .choice {
+      min-height: 78px;
+      border: 2px solid var(--line);
+      padding: 14px 16px;
+      background: #fff;
+      color: var(--ink);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-align: left;
+      line-height: 1.45;
+    }
+
+    .letter {
+      width: 30px;
+      height: 30px;
+      border-radius: 8px;
+      background: #eef2f7;
+      color: var(--muted);
+      display: grid;
+      place-items: center;
+      font-weight: 800;
+      flex: 0 0 auto;
+    }
+
+    .choice.correct { border-color: var(--green); background: #eaf8f2; }
+    .choice.wrong { border-color: var(--red); background: #fff0f0; }
+    .choice:disabled { cursor: default; }
+
+    .feedback {
+      min-height: 86px;
+      border-left: 4px solid #0787a8;
+      padding: 12px 14px;
+      border-radius: 8px;
+      background: #f0fbfe;
+      line-height: 1.65;
+    }
+
+    .feedback strong { color: #0787a8; }
+    .controls { justify-content: space-between; flex-wrap: wrap; }
+
+    .primary, .secondary {
+      min-height: 44px;
+      border: 1px solid transparent;
+      padding: 10px 16px;
+      font-weight: 800;
+    }
+
+    .primary { color: #fff; background: var(--blue); }
+    .primary:disabled { cursor: not-allowed; background: #98a2b3; transform: none; box-shadow: none; }
+    .secondary { color: var(--ink); background: #fff; border-color: var(--line); }
+
+    .record { line-height: 1.6; }
+    .record strong { display: block; }
+    .tag {
+      display: inline-block;
+      margin: 3px 5px 3px 0;
+      border-radius: 999px;
+      padding: 3px 8px;
+      color: #fff;
+      background: var(--blue);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .tag.exam { background: var(--red); }
+    .tag.review { background: var(--amber); }
+    .empty { border: 1px dashed var(--line); border-radius: 8px; padding: 16px; color: var(--muted); background: var(--paper); line-height: 1.7; }
+    footer { text-align: center; color: var(--muted); font-size: 12px; padding-bottom: 4px; }
+
+    @media (max-width: 900px) {
+      .app { width: min(100% - 20px, 680px); padding: 12px 0; }
+      header, main, .hero { grid-template-columns: 1fr; }
+      header { display: grid; align-items: start; }
+      main { display: flex; flex-direction: column; }
+      .sidebar { order: 2; }
+      .stage { min-height: 0; }
+      .hero { min-height: 260px; }
+      .hero h2 { font-size: 28px; }
+      .scene svg { max-width: 210px; margin: 0 auto; }
+      .knowledge, .choices { grid-template-columns: 1fr; }
+      .question { font-size: 23px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <div class="brand">
+        <div class="logo" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none">
+            <path d="M4 6.5A2.5 2.5 0 0 1 6.5 4H20v14H6.5A2.5 2.5 0 0 0 4 20.5v-14z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+            <path d="M8 8h8M8 12h7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div>
+          <h1>初中全科闯关学习小程序</h1>
+          <p class="subtitle">选科目，学关键点，闯关，单元考试，错题再教导</p>
+        </div>
+      </div>
+      <div class="actions">
+        <button class="icon-btn" id="parentJump" title="家长检查" aria-label="家长检查">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M4 19V5M4 19h16M8 15v-4M12 15V8M16 15v-6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        </button>
+        <button class="icon-btn" id="resetBtn" title="重置本小程序记录" aria-label="重置本小程序记录">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M4 7v5h5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M5.8 17A7.5 7.5 0 1 0 5 9" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <main>
+      <aside class="sidebar panel">
+        <section class="stat-grid">
+          <div class="stat"><b id="todayCount">0</b><span>今日完成</span></div>
+          <div class="stat"><b id="weekCount">0</b><span>7天记录</span></div>
+          <div class="stat"><b id="examCount">0</b><span>单元考试</span></div>
+          <div class="stat"><b id="mistakeCount">0</b><span>待复习错题</span></div>
+        </section>
+        <section>
+          <h3>科目</h3>
+          <div class="subject-list" id="subjectList"></div>
+        </section>
+        <section>
+          <h3>单元</h3>
+          <div class="unit-list" id="unitList"></div>
+        </section>
+      </aside>
+
+      <section class="stage panel">
+        <div class="hero">
+          <div>
+            <h2 id="heroTitle">把初中知识点做成一关一关的小任务。</h2>
+            <p id="heroText">每个单元先学关键点，再闯关。完成学习关后进入单元考试，错题会进入复习区，家长可以统一检查。</p>
+          </div>
+          <div class="scene" aria-hidden="true">
+            <svg viewBox="0 0 320 220">
+              <rect x="38" y="44" width="244" height="134" rx="8" fill="rgba(255,255,255,.16)" stroke="rgba(255,255,255,.45)" stroke-width="4"/>
+              <path d="M78 144l38-44 32 30 48-68 46 72" fill="none" stroke="#fbbf24" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+              <circle cx="116" cy="100" r="10" fill="#fff"/>
+              <circle cx="148" cy="130" r="10" fill="#fff"/>
+              <circle cx="196" cy="62" r="10" fill="#fff"/>
+              <path d="M70 184h180" stroke="#111827" stroke-width="11" stroke-linecap="round"/>
+              <text x="74" y="82" fill="#fff" font-family="Arial, sans-serif" font-size="23" font-weight="800">A</text>
+              <text x="230" y="128" fill="#fff" font-family="Arial, sans-serif" font-size="23" font-weight="800">+</text>
+            </svg>
+          </div>
+        </div>
+
+        <div class="content">
+          <nav class="tabs">
+            <button class="tab-btn active" data-tab="learn">学习闯关</button>
+            <button class="tab-btn" data-tab="exam">单元考试</button>
+            <button class="tab-btn" data-tab="review">错题教导</button>
+            <button class="tab-btn" data-tab="parent">家长检查</button>
+          </nav>
+
+          <section class="view show" id="learnView"></section>
+          <section class="view" id="examView"></section>
+          <section class="view" id="reviewView"></section>
+          <section class="view" id="parentView"></section>
+        </div>
+      </section>
+    </main>
+
+    <footer>建议节奏：每天选 1 个单元，先学再闯关；周末做单元考试，错题复盘后再玩。</footer>
+  </div>
+
+  <script>
+    const storageKey = "junior-all-subject-hub-v1";
+    const subjects = [
+      ["语文", "读懂文章，写清楚人和事", [
+        unit("现代文阅读", ["抓标题、开头结尾和反复出现的词", "概括中心要用“谁做了什么，表达什么”", "赏析句子先看修辞、动词和情感"], [
+          card("一篇文章的中心通常藏在哪里？", "标题、开头结尾和关键反复处", ["只看第一个字", "只看标点", "只看作者姓名"], "读文章先找高频词和首尾段，中心就有线索。"),
+          card("概括事件最稳的方法是？", "谁在什么情况下做了什么，结果怎样", ["把好词全抄下来", "只写自己的心情", "只写文章题目"], "概括不是抄句子，而是压缩主要事件。"),
+          card("赏析“他飞快地冲出教室”应重点看？", "动词和表现出的心情", ["字数多少", "有没有逗号", "纸张颜色"], "动词能表现人物状态，“冲”比“走”更急。")
+        ]),
+        unit("作文素材", ["好作文要有具体画面，不只喊口号", "人物描写可写动作、语言、神态、心理", "结尾最好回到成长、感受或主题"], [
+          card("写人物时，哪一种最具体？", "他攥紧试卷，低着头说不出话", ["他很难过", "他非常非常难过", "他有一点难过"], "具体动作比抽象形容更有画面。"),
+          card("记叙文最怕什么？", "只有道理没有事件", ["有细节", "有时间地点", "有对话"], "先把事情写清楚，道理才站得住。"),
+          card("作文结尾适合做什么？", "回扣主题，写出变化或感受", ["突然换一个故事", "只写“完了”", "大量堆成语"], "结尾要让读者知道这件事带来什么成长。")
+        ])
+      ]],
+      ["数学", "先理解方法，再训练准确率", [
+        unit("有理数", ["负数表示相反意义的量", "绝对值是到 0 的距离", "先定符号，再算绝对值"], [
+          card("(-7)+3 的结果是？", "-4", ["10", "4", "-10"], "异号相加，用 7-3=4，绝对值大的 -7 决定符号为负。"),
+          card("|-12| 表示什么？", "到 0 的距离是 12", ["等于 -12", "没有意义", "一定小于 0"], "绝对值是距离，距离不能为负。"),
+          card("数轴上 -2 和 5 的距离是？", "7", ["3", "-7", "5"], "距离 = 5 - (-2) = 7。")
+        ]),
+        unit("一元一次方程", ["方程是含未知数的等式", "移项要变号", "解完要能代回检查"], [
+          card("2x+3=11，x 等于？", "4", ["7", "5.5", "3"], "两边减 3 得 2x=8，再除以 2 得 x=4。"),
+          card("移项时要注意什么？", "变号", ["变颜色", "变大写", "去掉未知数"], "从等号一边移到另一边，加变减，减变加。"),
+          card("解方程后最好做什么？", "代回原方程检查", ["立刻擦掉过程", "只看答案长短", "换一支笔"], "代回能发现计算和符号错误。")
+        ])
+      ]],
+      ["英语", "单词加句子，听说读写一起走", [
+        unit("核心词句", ["单词要放进句子里记", "动词决定句子的动作", "每天开口读比只默看更有效"], [
+          card("habit 的中文意思是？", "习惯", ["目标", "错误", "考试"], "A good habit saves time. 好习惯能节省时间。"),
+          card("prepare 的意思是？", "准备", ["忘记", "保护", "收集"], "Prepare your books tonight. 今晚准备好书。"),
+          card("I usually get up at seven. 中 usually 表示？", "通常", ["从不", "昨天", "马上"], "usually 是频率副词，表示经常发生。")
+        ]),
+        unit("一般现在时", ["主语是第三人称单数时动词常加 s", "否定句常用 do not 或 does not", "一般疑问句用 Do/Does 开头"], [
+          card("He ___ English every day.", "studies", ["study", "studying", "studied"], "He 是第三人称单数，study 变 studies。"),
+          card("They do not ___ basketball after school.", "play", ["plays", "played", "playing"], "助动词 do 后用动词原形。"),
+          card("___ she like music?", "Does", ["Do", "Is", "Are"], "主语 she 是第三人称单数，疑问句用 Does。")
+        ])
+      ]],
+      ["物理", "从生活现象发现规律", [
+        unit("光和声音", ["光沿直线传播", "声音由振动产生", "声音传播需要介质"], [
+          card("影子形成主要说明什么？", "光沿直线传播", ["声音会反射", "水会蒸发", "铁会生锈"], "物体挡住直线传播的光，就形成影子。"),
+          card("拨动橡皮筋发声，是因为橡皮筋在？", "振动", ["发光", "熔化", "溶解"], "声音由物体振动产生。"),
+          card("月球上不能直接听见同伴喊话，主要因为？", "没有空气传播声音", ["月球太亮", "月球太冷", "月球没有影子"], "声音传播需要介质。")
+        ]),
+        unit("力和运动", ["运动和静止取决于参照物", "速度表示运动快慢", "惯性让物体保持原状态"], [
+          card("判断运动或静止，先选什么？", "参照物", ["温度计", "电池", "量筒"], "相对不同参照物，运动状态可能不同。"),
+          card("公交车急刹车，人向前倾是因为？", "惯性", ["光照", "溶解", "磁化"], "身体保持原来的运动状态，所以向前倾。"),
+          card("速度 = ?", "路程 ÷ 时间", ["时间 ÷ 路程", "质量 ÷ 体积", "力 ÷ 面积"], "速度表示单位时间内通过的路程。")
+        ])
+      ]],
+      ["化学", "先观察变化，再判断物质", [
+        unit("物质变化", ["是否生成新物质是关键", "燃烧、生锈多是化学变化", "溶解、熔化常是物理变化"], [
+          card("铁钉生锈属于？", "化学变化", ["物理变化", "位置变化", "声音变化"], "生成了铁锈这种新物质。"),
+          card("冰融化成水属于？", "物理变化", ["化学变化", "燃烧", "氧化"], "只是状态改变，没有生成新物质。"),
+          card("蜡烛燃烧判断为化学变化，因为？", "生成了新物质", ["火焰好看", "蜡烛变短", "房间变亮"], "燃烧会生成二氧化碳、水等。")
+        ]),
+        unit("空气和溶液", ["空气中氮气最多，氧气支持燃烧", "溶液具有均一、稳定特点", "过滤分离不溶性固体和液体"], [
+          card("空气中含量最多的是？", "氮气", ["氧气", "二氧化碳", "氢气"], "空气中氮气约占 78%。"),
+          card("氧气能使带火星木条？", "复燃", ["变黑", "结冰", "溶解"], "带火星木条复燃是检验氧气的常见现象。"),
+          card("过滤主要分离什么？", "不溶性固体和液体", ["盐和水", "氧气和氮气", "糖和水"], "过滤适合泥沙和水这类混合物。")
+        ])
+      ]],
+      ["生物", "认识生命现象和身体", [
+        unit("细胞和显微镜", ["细胞是生物体结构和功能的基本单位", "显微镜先低倍后高倍", "植物细胞有细胞壁、叶绿体等结构"], [
+          card("生物体结构和功能的基本单位是？", "细胞", ["器官", "组织", "系统"], "多数生物由细胞构成，细胞承担生命活动。"),
+          card("使用显微镜观察时通常先用？", "低倍镜", ["高倍镜", "反光镜背面", "手电筒"], "先低倍找到目标，再换高倍观察细节。"),
+          card("植物细胞常有而动物细胞没有的是？", "细胞壁", ["细胞膜", "细胞质", "细胞核"], "植物细胞有细胞壁，起支持和保护作用。")
+        ]),
+        unit("人体营养", ["食物提供能量和构建身体的物质", "小肠是吸收营养的主要场所", "均衡饮食比偏食更重要"], [
+          card("人体吸收营养的主要场所是？", "小肠", ["胃", "口腔", "食道"], "小肠长且有绒毛，适合吸收营养。"),
+          card("米饭、面条主要提供哪类营养？", "糖类", ["维生素", "无机盐", "水"], "糖类是重要供能物质。"),
+          card("长期偏食最容易导致？", "营养不均衡", ["一定长高", "不会生病", "学习自动变好"], "身体需要多种营养共同配合。")
+        ])
+      ]],
+      ["历史", "用时间线理解人和事", [
+        unit("史前与文明", ["历史学习先抓时间、地点、人物、事件", "农业出现让人类生活更稳定", "文物是研究历史的重要证据"], [
+          card("学习历史事件最先抓哪四点？", "时间、地点、人物、事件", ["颜色、大小、重量、价格", "天气、温度、速度、密度", "单词、语法、音标、作文"], "四要素能帮你搭起历史骨架。"),
+          card("文物对历史研究有什么作用？", "提供实物证据", ["代替所有课本", "一定能说话", "只用于装饰"], "文物能帮助我们了解过去真实生活。"),
+          card("农业出现的重要影响是？", "人类生活逐渐稳定", ["人类不能定居", "文字立刻消失", "火被禁止"], "农业让定居、村落和社会发展成为可能。")
+        ]),
+        unit("朝代线索", ["朝代学习要连成时间线", "制度、经济、文化是常见考点", "评价人物要看时代背景和影响"], [
+          card("记朝代最有效的方法之一是？", "按时间线串起来", ["只记最后一个字", "全部倒着背", "只看图片颜色"], "时间线能避免事件混乱。"),
+          card("评价历史人物时要注意？", "结合时代背景和影响", ["只看名字好不好听", "只看出生地", "只看身高"], "历史评价要具体、客观。"),
+          card("历史材料题常要求我们先做什么？", "读材料找关键词", ["跳过材料", "只猜答案", "只看题号"], "关键词能指向时间、观点和原因。")
+        ])
+      ]],
+      ["地理", "会看地图，理解人地关系", [
+        unit("地图入门", ["地图三要素是方向、比例尺、图例", "经纬线帮助定位", "等高线可判断地形高低"], [
+          card("地图三要素包括？", "方向、比例尺、图例", ["温度、声音、颜色", "质量、体积、密度", "主语、谓语、宾语"], "看地图先看三要素。"),
+          card("比例尺表示什么？", "图上距离与实际距离的关系", ["地图颜色", "天气好坏", "海拔高低"], "比例尺能帮助估算实际距离。"),
+          card("经纬网主要用于？", "确定位置", ["测声音", "判断化学变化", "写作文"], "经线和纬线交叉可确定地球上的位置。")
+        ]),
+        unit("天气与气候", ["天气短时间变化，气候长期稳定特征", "气温和降水是气候重要指标", "人类活动会影响环境"], [
+          card("天气和气候的区别是？", "天气短期，气候长期", ["完全一样", "天气只在晚上", "气候只在教室"], "今天下雨是天气，合肥夏季炎热多雨是气候。"),
+          card("描述气候常看哪两个指标？", "气温和降水", ["声音和光照", "质量和体积", "单词和句子"], "气温、降水决定一个地区气候特点。"),
+          card("保护环境与地理学习的关系是？", "理解人地关系", ["没有关系", "只和数学有关", "只看运气"], "地理关心自然环境与人类活动的相互影响。")
+        ])
+      ]],
+      ["道德与法治", "学会自律、合作和规则意识", [
+        unit("中学生活", ["初中变化包括课程、老师、同学和要求", "自主学习要会计划、执行、复盘", "友谊需要尊重和边界"], [
+          card("进入初中后最需要培养的是？", "自主学习习惯", ["完全靠家长提醒", "只看心情学习", "每天熬夜"], "初中科目多，自主计划很关键。"),
+          card("真正的友谊应该包含？", "尊重、理解和适当边界", ["无条件抄作业", "互相隐瞒错误", "只一起玩不学习"], "友谊不是迁就所有事，而是共同成长。"),
+          card("每天复盘 5 分钟主要帮助什么？", "发现问题并调整计划", ["拖延作业", "忘记任务", "制造焦虑"], "复盘能让下一天更有方向。")
+        ]),
+        unit("规则与法律", ["规则保障秩序和自由", "法律由国家制定或认可", "未成年人也要增强法治意识"], [
+          card("规则的作用是？", "保障秩序和自由", ["限制一切快乐", "只约束别人", "可有可无"], "没有规则，自由也容易被破坏。"),
+          card("法律最明显的特点之一是？", "具有强制性", ["只是一种建议", "只在学校使用", "可以随便改"], "法律靠国家强制力保证实施。"),
+          card("遇到校园欺凌，正确做法是？", "及时告诉老师和家长，保留证据", ["独自忍着", "以暴制暴", "帮对方隐瞒"], "保护自己要及时求助，不能沉默。")
+        ])
+      ]]
+    ].map(([name, intro, units]) => ({ name, intro, units }));
+
+    function unit(name, points, cards) { return { name, points, cards }; }
+    function card(q, a, wrong, explain) { return { q, a, wrong, explain }; }
+
+    const state = loadState();
+    const app = { subject: state.currentSubject || 0, unit: state.currentUnit || 0, tab: "learn", mode: null, index: 0, questions: [], score: 0, mistakes: [], selected: false };
+    const els = {
+      subjectList: document.querySelector("#subjectList"), unitList: document.querySelector("#unitList"), heroTitle: document.querySelector("#heroTitle"), heroText: document.querySelector("#heroText"),
+      learnView: document.querySelector("#learnView"), examView: document.querySelector("#examView"), reviewView: document.querySelector("#reviewView"), parentView: document.querySelector("#parentView"),
+      todayCount: document.querySelector("#todayCount"), weekCount: document.querySelector("#weekCount"), examCount: document.querySelector("#examCount"), mistakeCount: document.querySelector("#mistakeCount")
+    };
+
+    function baseState() { return { currentSubject: 0, currentUnit: 0, completed: {}, exams: {}, mistakes: [], history: [] }; }
+    function loadState() { try { return JSON.parse(localStorage.getItem(storageKey)) || baseState(); } catch { return baseState(); } }
+    function saveState() { state.currentSubject = app.subject; state.currentUnit = app.unit; localStorage.setItem(storageKey, JSON.stringify(state)); }
+    function todayKey(offset = 0) { const d = new Date(); d.setDate(d.getDate() + offset); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`; }
+    function shuffle(items) { return [...items].sort(() => Math.random() - .5); }
+    function key(s = app.subject, u = app.unit) { return `${s}-${u}`; }
+    function currentSubject() { return subjects[app.subject]; }
+    function currentUnit() { return currentSubject().units[app.unit]; }
+
+    function render() {
+      renderStats();
+      renderSubjects();
+      renderUnits();
+      renderHero();
+      renderActiveTab();
+      saveState();
+    }
+
+    function renderStats() {
+      const week = Array.from({ length: 7 }, (_, i) => todayKey(-i));
+      els.todayCount.textContent = state.history.filter(r => r.date === todayKey()).length;
+      els.weekCount.textContent = state.history.filter(r => week.includes(r.date)).length;
+      els.examCount.textContent = state.history.filter(r => r.type === "单元考试").length;
+      els.mistakeCount.textContent = state.mistakes.length;
+    }
+
+    function renderSubjects() {
+      els.subjectList.innerHTML = subjects.map((subject, i) => {
+        const done = subject.units.filter((_, u) => state.completed[key(i, u)]).length;
+        return `<button class="subject-btn ${i === app.subject ? "active" : ""}" data-subject="${i}"><span>${subject.name}</span><span class="badge">${done}/${subject.units.length}</span></button>`;
+      }).join("");
+      els.subjectList.querySelectorAll("button").forEach(btn => btn.addEventListener("click", () => { app.subject = Number(btn.dataset.subject); app.unit = 0; app.tab = "learn"; render(); }));
+    }
+
+    function renderUnits() {
+      els.unitList.innerHTML = currentSubject().units.map((unit, i) => {
+        const mark = state.exams[key(app.subject, i)] ? "考" : state.completed[key(app.subject, i)] ? "学" : "开";
+        return `<button class="unit-btn ${i === app.unit ? "active" : ""}" data-unit="${i}"><span>${unit.name}</span><span class="badge">${mark}</span></button>`;
+      }).join("");
+      els.unitList.querySelectorAll("button").forEach(btn => btn.addEventListener("click", () => { app.unit = Number(btn.dataset.unit); app.tab = "learn"; render(); }));
+    }
+
+    function renderHero() {
+      els.heroTitle.textContent = `${currentSubject().name}：${currentSubject().intro}`;
+      els.heroText.textContent = `当前单元：${currentUnit().name}。先读关键点，再闯学习关，最后做单元考试；错题会自动进入“错题教导”。`;
+    }
+
+    function renderActiveTab() {
+      document.querySelectorAll(".tab-btn").forEach(btn => btn.classList.toggle("active", btn.dataset.tab === app.tab));
+      document.querySelectorAll(".view").forEach(view => view.classList.remove("show"));
+      document.querySelector(`#${app.tab}View`).classList.add("show");
+      if (app.tab === "learn") renderLearn();
+      if (app.tab === "exam") renderExam();
+      if (app.tab === "review") renderReview();
+      if (app.tab === "parent") renderParent();
+    }
+
+    function renderLearn() {
+      const u = currentUnit();
+      els.learnView.innerHTML = `
+        <div class="unit-card">
+          <h3>${currentSubject().name} · ${u.name}</h3>
+          <div class="knowledge">${u.points.map(point => `<div class="point">${point}</div>`).join("")}</div>
+          <div class="controls">
+            <span class="muted">完成 ${u.cards.length} 个小挑战后，会记录为一次学习。</span>
+            <button class="primary" id="startLearn">开始学习闯关</button>
+          </div>
+        </div>`;
+      document.querySelector("#startLearn").addEventListener("click", () => startRun("学习闯关", u.cards));
+    }
+
+    function renderExam() {
+      const done = state.completed[key()];
+      const u = currentUnit();
+      els.examView.innerHTML = `
+        <div class="exam-card">
+          <h3>${currentSubject().name} · ${u.name} 单元考试</h3>
+          <p class="muted">${done ? "已完成学习关，可以考试。考试会抽取本单元知识点，错题进入复习区。" : "先完成学习闯关，再来考试，孩子会更有把握。"}</p>
+          <div class="controls">
+            <span class="muted">建议一周做 2-3 次单元考试。</span>
+            <button class="primary" id="startExam" ${done ? "" : "disabled"}>开始单元考试</button>
+          </div>
+        </div>`;
+      document.querySelector("#startExam").addEventListener("click", () => startRun("单元考试", shuffle([...u.cards, ...u.cards]).slice(0, 5)));
+    }
+
+    function renderReview() {
+      const list = state.mistakes.filter(m => m.subject === currentSubject().name);
+      els.reviewView.innerHTML = list.length ? `
+        <div class="review-list">
+          ${list.slice(-12).reverse().map((m, i) => `<div class="record"><span class="tag review">错题教导</span><strong>${m.subject} · ${m.unit}</strong>${m.q}<br>正确答案：${m.a}<br>${m.explain}<br><button class="secondary" data-review="${i}">我已复盘</button></div>`).join("")}
+        </div>` : `<div class="empty">当前科目暂无错题。做学习关或单元考试后，答错的题会自动来到这里。</div>`;
+      els.reviewView.querySelectorAll("[data-review]").forEach((btn, i) => btn.addEventListener("click", () => {
+        const target = list.slice(-12).reverse()[i];
+        state.mistakes = state.mistakes.filter(m => m.id !== target.id);
+        addHistory("错题复盘", target.subject, target.unit, 1, 1, []);
+        render();
+      }));
+    }
+
+    function renderParent() {
+      const week = Array.from({ length: 7 }, (_, i) => todayKey(-i));
+      const today = state.history.filter(r => r.date === todayKey());
+      const weekRecords = state.history.filter(r => week.includes(r.date)).reverse();
+      els.parentView.innerHTML = `
+        <div class="unit-card">
+          <h3>家长检查</h3>
+          <div class="knowledge">
+            <div class="point"><strong>今天完成：</strong>${today.length} 次</div>
+            <div class="point"><strong>7天完成：</strong>${weekRecords.length} 次</div>
+            <div class="point"><strong>单元考试：</strong>${state.history.filter(r => r.type === "单元考试").length} 次</div>
+            <div class="point"><strong>待复习错题：</strong>${state.mistakes.length} 题</div>
+          </div>
+        </div>
+        <div class="record-list">
+          ${weekRecords.length ? weekRecords.slice(0, 18).map(recordHtml).join("") : `<div class="empty">最近 7 天暂无记录。完成整关或考试后才会显示。</div>`}
+        </div>`;
+    }
+
+    function recordHtml(r) {
+      return `<div class="record"><span class="tag ${r.type === "单元考试" ? "exam" : ""}">${r.type}</span><strong>${r.date} ${r.time} · ${r.subject} · ${r.unit}</strong>答对 ${r.correct}/${r.total}，星星 ${"★".repeat(r.stars || 0) || "0"}${r.mistakes.length ? `<br>错题：${r.mistakes.join("；")}` : "<br>错题：无"}</div>`;
+    }
+
+    function startRun(type, cards) {
+      app.mode = type; app.index = 0; app.questions = cards; app.score = 0; app.mistakes = []; app.selected = false;
+      const view = type === "单元考试" ? els.examView : els.learnView;
+      view.innerHTML = `<div class="play">
+        <div class="meter-row"><div class="progress"><span id="bar"></span></div><div class="counter" id="counter"></div></div>
+        <div class="lesson-card"><div class="meta"><span class="pill">${currentSubject().name}</span><span class="pill">${currentUnit().name}</span><span class="pill">${type}</span></div><p class="mission" id="mission"></p><div class="question" id="question"></div><div class="teach" id="teach"></div></div>
+        <div class="choices" id="choices"></div>
+        <div class="feedback" id="feedback"><strong>先想一想：</strong>选出你认为最合理的答案。</div>
+        <div class="controls"><button class="secondary" id="hintBtn">提示</button><button class="primary" id="nextBtn" disabled>下一题</button></div>
+      </div>`;
+      renderQuestion();
+    }
+
+    function renderQuestion() {
+      const q = app.questions[app.index];
+      app.selected = false;
+      document.querySelector("#bar").style.width = `${(app.index / app.questions.length) * 100}%`;
+      document.querySelector("#counter").textContent = `${app.index + 1} / ${app.questions.length}`;
+      document.querySelector("#mission").textContent = app.mode === "单元考试" ? "单元考试题" : "学习挑战";
+      document.querySelector("#question").textContent = q.q;
+      document.querySelector("#teach").textContent = app.mode === "单元考试" ? "先独立判断；答完后会看到解析。" : q.explain;
+      document.querySelector("#feedback").innerHTML = "<strong>先想一想：</strong>选出你认为最合理的答案。";
+      document.querySelector("#nextBtn").disabled = true;
+      const choices = document.querySelector("#choices");
+      choices.innerHTML = "";
+      shuffle([q.a, ...q.wrong]).forEach((choice, i) => {
+        const btn = document.createElement("button");
+        btn.className = "choice";
+        btn.innerHTML = `<span class="letter">${String.fromCharCode(65 + i)}</span><span>${choice}</span>`;
+        btn.addEventListener("click", () => choose(btn, choice, q));
+        choices.appendChild(btn);
+      });
+      document.querySelector("#hintBtn").onclick = () => { document.querySelector("#feedback").innerHTML = `<strong>提示：</strong>${currentUnit().points[app.index % currentUnit().points.length]}`; };
+      document.querySelector("#nextBtn").onclick = nextQuestion;
+    }
+
+    function choose(btn, choice, q) {
+      if (app.selected) return;
+      app.selected = true;
+      const ok = choice === q.a;
+      document.querySelectorAll(".choice").forEach(node => { node.disabled = true; if (node.textContent.includes(q.a)) node.classList.add("correct"); });
+      if (ok) {
+        app.score += 1;
+        btn.classList.add("correct");
+        document.querySelector("#feedback").innerHTML = `<strong>答对：</strong>${q.explain}`;
+      } else {
+        const mistake = { id: `${Date.now()}-${Math.random()}`, subject: currentSubject().name, unit: currentUnit().name, q: q.q, a: q.a, explain: q.explain };
+        app.mistakes.push(mistake);
+        btn.classList.add("wrong");
+        document.querySelector("#feedback").innerHTML = `<strong>错题教导：</strong>正确答案是“${q.a}”。${q.explain}`;
+      }
+      document.querySelector("#nextBtn").disabled = false;
+    }
+
+    function nextQuestion() {
+      if (app.index < app.questions.length - 1) { app.index += 1; renderQuestion(); return; }
+      finishRun();
+    }
+
+    function finishRun() {
+      const total = app.questions.length;
+      const stars = app.score >= Math.ceil(total * .9) ? 3 : app.score >= Math.ceil(total * .7) ? 2 : app.score >= Math.ceil(total * .5) ? 1 : 0;
+      if (app.mode === "学习闯关") state.completed[key()] = { correct: app.score, total, stars };
+      if (app.mode === "单元考试") state.exams[key()] = { correct: app.score, total, stars };
+      state.mistakes.push(...app.mistakes);
+      addHistory(app.mode, currentSubject().name, currentUnit().name, app.score, total, app.mistakes.map(m => m.q), stars);
+      const view = app.mode === "单元考试" ? els.examView : els.learnView;
+      view.innerHTML = `<div class="unit-card">
+        <h3>${app.mode}完成</h3>
+        <p>答对 ${app.score}/${total}，获得 ${"★".repeat(stars) || "0"}。${app.mistakes.length ? "错题已进入“错题教导”。" : "本轮没有错题。"}</p>
+        <div class="review-list">${(app.mistakes.length ? app.mistakes : app.questions.slice(0, 2)).map(item => `<div class="record"><strong>${item.q}</strong>${item.a ? `答案：${item.a}<br>${item.explain}` : item.explain}</div>`).join("")}</div>
+        <div class="controls"><button class="secondary" id="backUnit">回到单元</button><button class="primary" id="goReview">查看错题教导</button></div>
+      </div>`;
+      document.querySelector("#backUnit").addEventListener("click", render);
+      document.querySelector("#goReview").addEventListener("click", () => { app.tab = "review"; render(); });
+      saveState();
+      renderStats();
+      renderSubjects();
+      renderUnits();
+    }
+
+    function addHistory(type, subject, unitName, correct, total, mistakes, stars = correct >= total ? 3 : 1) {
+      state.history ||= [];
+      state.history.push({ date: todayKey(), time: new Date().toLocaleTimeString("zh-CN", { hour: "2-digit", minute: "2-digit" }), type, subject, unit: unitName, correct, total, stars, mistakes });
+      state.history = state.history.slice(-160);
+    }
+
+    document.querySelectorAll(".tab-btn").forEach(btn => btn.addEventListener("click", () => { app.tab = btn.dataset.tab; renderActiveTab(); }));
+    document.querySelector("#parentJump").addEventListener("click", () => { app.tab = "parent"; renderActiveTab(); });
+    document.querySelector("#resetBtn").addEventListener("click", () => { if (!confirm("确定要清空全科小程序学习记录吗？")) return; localStorage.removeItem(storageKey); Object.assign(state, baseState()); app.subject = 0; app.unit = 0; app.tab = "learn"; render(); });
+    render();
+  </script>
+</body>
+</html>

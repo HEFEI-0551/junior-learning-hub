@@ -1,0 +1,382 @@
+﻿<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>家长检查学习记录</title>
+  <style>
+    :root {
+      --ink: #15212f;
+      --muted: #667085;
+      --line: #d9e0e8;
+      --blue: #2563eb;
+      --green: #0f9f6e;
+      --red: #dc3d43;
+      --paper: #f6f8fb;
+      --shadow: 0 14px 38px rgba(20, 32, 48, .12);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      background: linear-gradient(135deg, #eef7ff, #f8fbf1 55%, #fff7ed);
+      font-family: "Microsoft YaHei", "PingFang SC", "Segoe UI", sans-serif;
+      letter-spacing: 0;
+    }
+
+    .app {
+      width: min(1080px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 24px 0;
+      display: grid;
+      gap: 18px;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 14px;
+    }
+
+    h1,
+    h2,
+    h3,
+    p {
+      margin: 0;
+    }
+
+    h1 {
+      font-size: 28px;
+      line-height: 1.2;
+    }
+
+    .muted {
+      margin-top: 6px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    button,
+    a.button {
+      min-height: 42px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 9px 14px;
+      background: #fff;
+      color: var(--ink);
+      font: inherit;
+      font-weight: 800;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    .primary {
+      color: #fff;
+      border-color: var(--blue);
+      background: var(--blue);
+    }
+
+    .summary {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .card,
+    .panel {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, .88);
+      box-shadow: var(--shadow);
+    }
+
+    .card {
+      min-height: 100px;
+      padding: 16px;
+    }
+
+    .card b {
+      display: block;
+      font-size: 30px;
+      line-height: 1.1;
+    }
+
+    .card span {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .status {
+      display: inline-block;
+      margin-top: 10px;
+      border-radius: 999px;
+      padding: 5px 10px;
+      color: #fff;
+      background: var(--green);
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .status.no {
+      background: var(--red);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .panel {
+      padding: 18px;
+      display: grid;
+      gap: 12px;
+      align-content: start;
+    }
+
+    .day-list,
+    .record-list {
+      display: grid;
+      gap: 8px;
+    }
+
+    .day,
+    .record {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      padding: 10px 12px;
+      line-height: 1.55;
+    }
+
+    .day {
+      display: grid;
+      grid-template-columns: 96px minmax(0, 1fr);
+      gap: 10px;
+    }
+
+    .date {
+      font-weight: 800;
+    }
+
+    .tag {
+      display: inline-block;
+      margin: 3px 5px 3px 0;
+      border-radius: 999px;
+      padding: 3px 8px;
+      color: #fff;
+      background: var(--blue);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .tag.math {
+      background: #0f9f6e;
+    }
+
+    .tag.physics {
+      background: #d97706;
+    }
+
+    .tag.chemistry {
+      background: #6d5bd0;
+    }
+
+    .empty {
+      border: 1px dashed var(--line);
+      border-radius: 8px;
+      padding: 16px;
+      color: var(--muted);
+      background: var(--paper);
+      line-height: 1.7;
+    }
+
+    @media (max-width: 820px) {
+      .app {
+        width: min(100% - 20px, 680px);
+        padding: 14px 0;
+      }
+
+      header,
+      .grid,
+      .summary {
+        grid-template-columns: 1fr;
+        display: grid;
+      }
+
+      .actions {
+        justify-content: stretch;
+      }
+
+      button,
+      a.button {
+        text-align: center;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <div>
+        <h1>家长检查学习记录</h1>
+        <p class="muted">完成一整关才会记入记录。孩子可以每天做完后打开这一页截图发给家长。</p>
+      </div>
+      <div class="actions">
+        <a class="button" href="english.html">英语</a>
+        <a class="button" href="math.html">数学</a>
+        <a class="button" href="physics.html">物理</a>
+        <a class="button" href="chemistry.html">化学</a>
+        <a class="button" href="index.html">全科</a>
+        <button class="primary" id="refreshBtn">刷新</button>
+      </div>
+    </header>
+
+    <section class="summary">
+      <div class="card">
+        <b id="todayDone">0</b>
+        <span>今日完成关卡</span>
+        <div class="status no" id="todayStatus">今天还未完成</div>
+      </div>
+      <div class="card"><b id="weekDone">0</b><span>最近 7 天完成关卡</span></div>
+      <div class="card"><b id="weekCorrect">0</b><span>最近 7 天答对题数</span></div>
+      <div class="card"><b id="weekStars">0</b><span>最近 7 天星星</span></div>
+    </section>
+
+    <section class="grid">
+      <div class="panel">
+        <h2>最近 7 天</h2>
+        <div class="day-list" id="dayList"></div>
+      </div>
+      <div class="panel">
+        <h2>今日明细</h2>
+        <div class="record-list" id="todayList"></div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>最近完成记录</h2>
+      <div class="record-list" id="recentList"></div>
+    </section>
+  </div>
+
+  <script>
+    const keys = [
+      { key: "junior-word-blade-progress-v1", subject: "英语" },
+      { key: "junior-math-quest-progress-v1", subject: "数学" },
+      { key: "junior-physics-quest-progress-v1", subject: "物理" },
+      { key: "junior-chemistry-quest-progress-v1", subject: "化学" },
+      { key: "junior-all-subject-hub-v1", subject: "全科小程序" }
+    ];
+
+    function readState(key) {
+      try {
+        return JSON.parse(localStorage.getItem(key)) || {};
+      } catch {
+        return {};
+      }
+    }
+
+    function todayKey(offset = 0) {
+      const date = new Date();
+      date.setDate(date.getDate() + offset);
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const day = String(date.getDate()).padStart(2, "0");
+      return `${year}-${month}-${day}`;
+    }
+
+    function getRecords() {
+      return keys.flatMap(item => {
+        const state = readState(item.key);
+        return (state.history || []).map(record => normalizeRecord(record, item.subject));
+      }).sort((a, b) => `${b.date} ${b.time || ""}`.localeCompare(`${a.date} ${a.time || ""}`));
+    }
+
+    function normalizeRecord(record, fallbackSubject) {
+      const subject = record.subject || fallbackSubject;
+      const title = record.levelName
+        ? `第 ${record.level} 关：${record.levelName}`
+        : `${record.type || "学习闯关"}：${record.unit || "未命名单元"}`;
+      return { ...record, subject, title };
+    }
+
+    function stars(count) {
+      return "★".repeat(count || 0) || "0";
+    }
+
+    function subjectClass(subject) {
+      if (subject === "数学") return "tag math";
+      if (subject === "物理") return "tag physics";
+      if (subject === "化学") return "tag chemistry";
+      if (subject === "生物") return "tag math";
+      if (subject === "历史") return "tag physics";
+      if (subject === "地理") return "tag chemistry";
+      return "tag";
+    }
+
+    function recordHtml(record) {
+      const cls = subjectClass(record.subject);
+      const mistakes = record.mistakes && record.mistakes.length
+        ? `<br>错题：${record.mistakes.join("；")}`
+        : "<br>错题：无或未记录";
+      return `<div class="record">
+        <span class="${cls}">${record.subject}</span>
+        <strong>${record.date} ${record.time || ""}</strong>
+        <br>${record.title}，答对 ${record.correct}/${record.total}，星星 ${stars(record.stars)}
+        ${mistakes}
+      </div>`;
+    }
+
+    function render() {
+      const records = getRecords();
+      const today = todayKey();
+      const weekDates = Array.from({ length: 7 }, (_, index) => todayKey(-index));
+      const weekRecords = records.filter(record => weekDates.includes(record.date));
+      const todayRecords = records.filter(record => record.date === today);
+
+      document.querySelector("#todayDone").textContent = todayRecords.length;
+      document.querySelector("#weekDone").textContent = weekRecords.length;
+      document.querySelector("#weekCorrect").textContent = weekRecords.reduce((sum, record) => sum + Number(record.correct || 0), 0);
+      document.querySelector("#weekStars").textContent = weekRecords.reduce((sum, record) => sum + Number(record.stars || 0), 0);
+
+      const status = document.querySelector("#todayStatus");
+      status.textContent = todayRecords.length ? "今天已完成" : "今天还未完成";
+      status.classList.toggle("no", !todayRecords.length);
+
+      document.querySelector("#dayList").innerHTML = weekDates.map(date => {
+        const dayRecords = records.filter(record => record.date === date);
+        const content = dayRecords.length
+          ? dayRecords.map(record => `<span class="${subjectClass(record.subject)}">${record.subject} ${record.correct}/${record.total}</span>`).join("")
+          : "<span class=\"muted\">未完成</span>";
+        return `<div class="day"><div class="date">${date}</div><div>${content}</div></div>`;
+      }).join("");
+
+      document.querySelector("#todayList").innerHTML = todayRecords.length
+        ? todayRecords.map(recordHtml).join("")
+        : "<div class=\"empty\">今天还没有完成整关。打开英语或数学游戏，完成 10 题后再回来看。</div>";
+
+      document.querySelector("#recentList").innerHTML = records.length
+        ? records.slice(0, 12).map(recordHtml).join("")
+        : "<div class=\"empty\">暂无记录。注意：以前版本完成的关卡可能只有星星和解锁状态，新版从现在开始记录每天明细。</div>";
+    }
+
+    document.querySelector("#refreshBtn").addEventListener("click", render);
+    render();
+  </script>
+</body>
+</html>
+

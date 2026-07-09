@@ -1,0 +1,1041 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>初中数学闯关训练</title>
+  <style>
+    :root {
+      --ink: #132238;
+      --muted: #667085;
+      --line: #d7dee8;
+      --paper: #f7fafc;
+      --panel: #ffffff;
+      --blue: #1d4ed8;
+      --green: #0f9f6e;
+      --orange: #ea8a13;
+      --red: #dc3d43;
+      --cyan: #0787a8;
+      --shadow: 0 14px 38px rgba(20, 32, 48, .12);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 12% 15%, rgba(29, 78, 216, .12), transparent 26%),
+        radial-gradient(circle at 90% 12%, rgba(234, 138, 19, .13), transparent 24%),
+        linear-gradient(135deg, #eef7ff 0%, #f8fbf1 54%, #fff6ec 100%);
+      font-family: "Microsoft YaHei", "PingFang SC", "Segoe UI", sans-serif;
+      letter-spacing: 0;
+    }
+
+    button {
+      cursor: pointer;
+      font: inherit;
+    }
+
+    .app {
+      width: min(1180px, calc(100% - 32px));
+      min-height: 100vh;
+      margin: 0 auto;
+      padding: 24px 0;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      gap: 18px;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .logo {
+      width: 46px;
+      height: 46px;
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
+      color: #fff;
+      background: var(--ink);
+      box-shadow: var(--shadow);
+      flex: 0 0 auto;
+    }
+
+    .logo svg,
+    .icon-btn svg {
+      width: 24px;
+      height: 24px;
+    }
+
+    h1,
+    h2,
+    h3,
+    p {
+      margin: 0;
+    }
+
+    h1 {
+      font-size: 24px;
+      line-height: 1.2;
+    }
+
+    .subtitle {
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .top-actions {
+      display: flex;
+      gap: 10px;
+    }
+
+    .icon-btn {
+      width: 42px;
+      height: 42px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, .86);
+      color: var(--ink);
+      display: grid;
+      place-items: center;
+      transition: .16s ease;
+    }
+
+    .icon-btn:hover,
+    .level-btn:hover,
+    .choice:hover,
+    .primary:hover,
+    .secondary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 10px 24px rgba(20, 32, 48, .14);
+    }
+
+    main {
+      display: grid;
+      grid-template-columns: 260px minmax(0, 1fr);
+      gap: 18px;
+      min-height: 0;
+    }
+
+    .sidebar,
+    .stage,
+    .result {
+      border: 1px solid rgba(215, 222, 232, .88);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, .84);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(8px);
+    }
+
+    .sidebar {
+      padding: 16px;
+      display: grid;
+      gap: 16px;
+      align-self: start;
+    }
+
+    .stat-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .stat {
+      min-height: 72px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 10px;
+      background: #fff;
+    }
+
+    .stat b {
+      display: block;
+      font-size: 22px;
+      line-height: 1.15;
+    }
+
+    .stat span {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .level-list {
+      display: grid;
+      gap: 8px;
+    }
+
+    .level-btn {
+      min-height: 42px;
+      padding: 8px 10px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      color: var(--ink);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      transition: .16s ease;
+    }
+
+    .level-btn.active {
+      color: var(--blue);
+      border-color: var(--blue);
+      box-shadow: inset 3px 0 0 var(--blue);
+    }
+
+    .level-btn:disabled {
+      cursor: not-allowed;
+      color: #98a2b3;
+      background: #f2f4f7;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .badge {
+      min-width: 34px;
+      text-align: center;
+      border-radius: 999px;
+      padding: 3px 8px;
+      color: #fff;
+      background: var(--green);
+      font-size: 12px;
+    }
+
+    .badge.lock {
+      background: #98a2b3;
+    }
+
+    .stage {
+      min-height: 640px;
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr);
+      overflow: hidden;
+    }
+
+    .hero {
+      min-height: 210px;
+      padding: 24px;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 280px;
+      align-items: center;
+      gap: 18px;
+      color: #fff;
+      background:
+        linear-gradient(120deg, rgba(19, 34, 56, .95), rgba(7, 135, 168, .84)),
+        #132238;
+      overflow: hidden;
+    }
+
+    .hero h2 {
+      font-size: 36px;
+      line-height: 1.12;
+      max-width: 680px;
+    }
+
+    .hero p {
+      margin-top: 12px;
+      max-width: 650px;
+      color: rgba(255, 255, 255, .78);
+      line-height: 1.7;
+    }
+
+    .scene {
+      width: 100%;
+      max-width: 280px;
+      justify-self: end;
+    }
+
+    .scene svg {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+
+    .game {
+      padding: 20px;
+      display: grid;
+      grid-template-rows: auto auto minmax(0, 1fr) auto auto;
+      gap: 16px;
+    }
+
+    .meter-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .progress {
+      height: 12px;
+      border-radius: 999px;
+      background: #e7edf4;
+      overflow: hidden;
+    }
+
+    .progress span {
+      display: block;
+      width: 0;
+      height: 100%;
+      background: linear-gradient(90deg, var(--green), var(--blue));
+      transition: width .25s ease;
+    }
+
+    .counter {
+      color: var(--muted);
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .question-card {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--paper);
+      padding: 18px;
+      display: grid;
+      gap: 12px;
+    }
+
+    .question-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .pill {
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 5px 9px;
+      background: #fff;
+    }
+
+    .question {
+      font-size: 30px;
+      line-height: 1.35;
+      font-weight: 800;
+      overflow-wrap: anywhere;
+    }
+
+    .choices {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      align-content: start;
+    }
+
+    .choice {
+      min-height: 80px;
+      border: 2px solid var(--line);
+      border-radius: 8px;
+      padding: 14px 16px;
+      background: #fff;
+      color: var(--ink);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-align: left;
+      transition: .16s ease;
+      line-height: 1.45;
+    }
+
+    .letter {
+      width: 30px;
+      height: 30px;
+      border-radius: 8px;
+      background: #eef2f7;
+      color: var(--muted);
+      display: grid;
+      place-items: center;
+      font-weight: 800;
+      flex: 0 0 auto;
+    }
+
+    .choice.correct {
+      border-color: var(--green);
+      background: #eaf8f2;
+    }
+
+    .choice.wrong {
+      border-color: var(--red);
+      background: #fff0f0;
+    }
+
+    .choice:disabled {
+      cursor: default;
+    }
+
+    .scratch {
+      min-height: 86px;
+      border-left: 4px solid var(--cyan);
+      padding: 12px 14px;
+      border-radius: 8px;
+      background: #f0fbfe;
+      line-height: 1.65;
+    }
+
+    .scratch strong {
+      color: var(--cyan);
+    }
+
+    .formula {
+      font-family: Consolas, "Microsoft YaHei", monospace;
+      font-weight: 700;
+    }
+
+    .controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .primary,
+    .secondary {
+      min-height: 44px;
+      border-radius: 8px;
+      padding: 10px 16px;
+      border: 1px solid transparent;
+      font-weight: 800;
+      transition: .16s ease;
+    }
+
+    .primary {
+      color: #fff;
+      background: var(--blue);
+    }
+
+    .primary:disabled {
+      cursor: not-allowed;
+      background: #98a2b3;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .secondary {
+      color: var(--ink);
+      background: #fff;
+      border-color: var(--line);
+    }
+
+    .result {
+      display: none;
+      padding: 22px;
+      gap: 18px;
+      align-content: start;
+    }
+
+    .result.show {
+      display: grid;
+    }
+
+    .result h2 {
+      font-size: 30px;
+    }
+
+    .review-list {
+      display: grid;
+      gap: 8px;
+    }
+
+    .review-item {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      padding: 10px 12px;
+      display: grid;
+      grid-template-columns: minmax(120px, .45fr) minmax(0, 1fr);
+      gap: 10px;
+      line-height: 1.55;
+    }
+
+    footer {
+      color: var(--muted);
+      font-size: 12px;
+      text-align: center;
+      padding-bottom: 4px;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    @media (max-width: 860px) {
+      .app {
+        width: min(100% - 20px, 680px);
+        padding: 12px 0;
+      }
+
+      .topbar,
+      main,
+      .hero {
+        grid-template-columns: 1fr;
+      }
+
+      .topbar {
+        align-items: start;
+      }
+
+      main {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .sidebar {
+        order: 2;
+      }
+
+      .stage {
+        min-height: 0;
+      }
+
+      .hero {
+        min-height: 260px;
+      }
+
+      .hero h2 {
+        font-size: 30px;
+      }
+
+      .scene {
+        max-width: 210px;
+        justify-self: center;
+      }
+
+      .question {
+        font-size: 24px;
+      }
+
+      .choices,
+      .review-item {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div class="brand">
+        <div class="logo" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none">
+            <path d="M4 19h16" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+            <path d="M7 16l4-8 3 5 3-7" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M5 5h4M7 3v4M15 17h4" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div>
+          <h1>初中数学闯关训练</h1>
+          <p class="subtitle">准初一 10 关，计算、方程、几何、应用题逐步升级</p>
+        </div>
+      </div>
+      <div class="top-actions">
+        <button class="icon-btn" id="parentBtn" title="家长检查" aria-label="家长检查">
+          <svg viewBox="0 0 24 24" fill="none">
+            <path d="M4 19V5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            <path d="M4 19h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            <path d="M8 15v-4M12 15V8M16 15v-6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </button>
+        <button class="icon-btn" id="resetBtn" title="重置进度" aria-label="重置进度">
+          <svg viewBox="0 0 24 24" fill="none">
+            <path d="M4 7v5h5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M5.8 17A7.5 7.5 0 1 0 5 9" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <main>
+      <aside class="sidebar">
+        <section class="stat-grid" aria-label="学习数据">
+          <div class="stat"><b id="totalCorrect">0</b><span>累计答对</span></div>
+          <div class="stat"><b id="bestStreak">0</b><span>最高连胜</span></div>
+          <div class="stat"><b id="mistakeCount">0</b><span>错题数</span></div>
+          <div class="stat"><b id="stars">0</b><span>星星</span></div>
+        </section>
+        <section>
+          <h3>关卡</h3>
+          <div class="level-list" id="levelList"></div>
+        </section>
+      </aside>
+
+      <section class="stage">
+        <div class="hero">
+          <div>
+            <h2>把初中数学拆成小关卡，先练准，再练快。</h2>
+            <p>每关 10 题，答错会进入错题本。完成一关后先看解析，再进入下一关。</p>
+          </div>
+          <div class="scene" aria-hidden="true">
+            <svg viewBox="0 0 320 220">
+              <defs>
+                <linearGradient id="board" x1="0" x2="1">
+                  <stop offset="0" stop-color="#f8fafc"/>
+                  <stop offset="1" stop-color="#bfdbfe"/>
+                </linearGradient>
+              </defs>
+              <rect x="38" y="42" width="244" height="138" rx="8" fill="rgba(255,255,255,.16)" stroke="rgba(255,255,255,.45)" stroke-width="4"/>
+              <path d="M62 152h196" stroke="rgba(255,255,255,.45)" stroke-width="7" stroke-linecap="round"/>
+              <path d="M82 134l42-50 34 32 48-62 32 38" fill="none" stroke="#fbbf24" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+              <circle cx="124" cy="84" r="10" fill="#f8fafc"/>
+              <circle cx="158" cy="116" r="10" fill="#f8fafc"/>
+              <circle cx="206" cy="54" r="10" fill="#f8fafc"/>
+              <text x="72" y="76" fill="#fff" font-family="Arial, sans-serif" font-size="22" font-weight="800">x</text>
+              <text x="232" y="128" fill="#fff" font-family="Arial, sans-serif" font-size="28" font-weight="800">π</text>
+              <path d="M96 184h128" stroke="#111827" stroke-width="12" stroke-linecap="round"/>
+              <path d="M132 184l-18 24M188 184l18 24" stroke="#111827" stroke-width="10" stroke-linecap="round"/>
+            </svg>
+          </div>
+        </div>
+
+        <div class="game" id="game">
+          <div class="meter-row">
+            <div class="progress" aria-label="本关进度"><span id="progressBar"></span></div>
+            <div class="counter" id="counter">1 / 10</div>
+          </div>
+
+          <div class="question-card">
+            <div class="question-meta">
+              <span class="pill" id="levelName">第 1 关：整数计算</span>
+              <span class="pill" id="streak">连胜 0</span>
+              <span class="pill" id="score">本关 0 分</span>
+            </div>
+            <div class="question" id="questionText">3 + 5 = ?</div>
+          </div>
+
+          <div class="choices" id="choices"></div>
+
+          <div class="scratch" id="scratch">
+            <strong>准备开始：</strong>先在心里算一遍，再选择答案。
+          </div>
+
+          <div class="controls">
+            <button class="secondary" id="showTipBtn">提示</button>
+            <button class="primary" id="nextBtn" disabled>下一题</button>
+          </div>
+        </div>
+
+        <div class="result" id="result">
+          <h2 id="resultTitle">闯关完成</h2>
+          <p id="resultText"></p>
+          <div class="review-list" id="reviewList"></div>
+          <div class="controls">
+            <button class="secondary" id="retryBtn">重练本关</button>
+            <button class="primary" id="continueBtn">进入下一关</button>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer>建议每天 15-20 分钟：闯一关，错题讲清楚原因，再休息。</footer>
+  </div>
+
+  <script>
+    const storageKey = "junior-math-quest-progress-v1";
+
+    const levels = [
+      { name: "整数计算", tip: "先看符号，再按从左到右或先乘除后加减计算。", build: buildInteger },
+      { name: "正负数", tip: "同号相加取相同符号，异号相加看绝对值大的符号。", build: buildSigned },
+      { name: "数轴与绝对值", tip: "绝对值表示到 0 的距离，距离没有负数。", build: buildAbsolute },
+      { name: "有理数混合", tip: "先算括号，再算乘除，最后加减。", build: buildMixed },
+      { name: "代数式求值", tip: "把字母换成给定数字，负数代入时最好加括号。", build: buildExpression },
+      { name: "一元一次方程", tip: "移项要变号，最后把未知数系数化为 1。", build: buildEquation },
+      { name: "比例与百分数", tip: "百分数先化成小数或分数，比例题先找总量和部分量。", build: buildPercent },
+      { name: "几何周长面积", tip: "画出长、宽、边，再套对应公式。", build: buildGeometry },
+      { name: "角度入门", tip: "平角是 180°，直角是 90°，对顶角相等。", build: buildAngle },
+      { name: "综合应用", tip: "先设未知数或找等量关系，不急着算。", build: buildWordProblem }
+    ];
+
+    const state = loadState();
+    const game = {
+      levelIndex: state.currentLevel || 0,
+      questionIndex: 0,
+      questions: [],
+      score: 0,
+      streak: 0,
+      selected: false,
+      roundMistakes: []
+    };
+
+    const els = {
+      levelList: document.querySelector("#levelList"),
+      totalCorrect: document.querySelector("#totalCorrect"),
+      bestStreak: document.querySelector("#bestStreak"),
+      mistakeCount: document.querySelector("#mistakeCount"),
+      stars: document.querySelector("#stars"),
+      progressBar: document.querySelector("#progressBar"),
+      counter: document.querySelector("#counter"),
+      levelName: document.querySelector("#levelName"),
+      streak: document.querySelector("#streak"),
+      score: document.querySelector("#score"),
+      questionText: document.querySelector("#questionText"),
+      choices: document.querySelector("#choices"),
+      scratch: document.querySelector("#scratch"),
+      showTipBtn: document.querySelector("#showTipBtn"),
+      nextBtn: document.querySelector("#nextBtn"),
+      game: document.querySelector("#game"),
+      result: document.querySelector("#result"),
+      resultTitle: document.querySelector("#resultTitle"),
+      resultText: document.querySelector("#resultText"),
+      reviewList: document.querySelector("#reviewList"),
+      retryBtn: document.querySelector("#retryBtn"),
+      continueBtn: document.querySelector("#continueBtn"),
+      parentBtn: document.querySelector("#parentBtn"),
+      resetBtn: document.querySelector("#resetBtn")
+    };
+
+    function loadState() {
+      try {
+        return JSON.parse(localStorage.getItem(storageKey)) || baseState();
+      } catch {
+        return baseState();
+      }
+    }
+
+    function baseState() {
+      return { unlocked: 1, completed: {}, mistakes: {}, history: [], bestStreak: 0, currentLevel: 0 };
+    }
+
+    function todayKey() {
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, "0");
+      const day = String(now.getDate()).padStart(2, "0");
+      return `${year}-${month}-${day}`;
+    }
+
+    function recordStudy(correct, stars) {
+      state.history ||= [];
+      state.history.push({
+        date: todayKey(),
+        time: new Date().toLocaleTimeString("zh-CN", { hour: "2-digit", minute: "2-digit" }),
+        subject: "数学",
+        level: game.levelIndex + 1,
+        levelName: levels[game.levelIndex].name,
+        correct,
+        total: game.questions.length,
+        stars,
+        mistakes: game.roundMistakes.map(item => `${item.text} 答案:${item.answer}`).slice(0, 6)
+      });
+      state.history = state.history.slice(-80);
+    }
+
+    function saveState() {
+      state.currentLevel = game.levelIndex;
+      localStorage.setItem(storageKey, JSON.stringify(state));
+    }
+
+    function rand(min, max) {
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    function shuffle(items) {
+      return [...items].sort(() => Math.random() - .5);
+    }
+
+    function uniqOptions(answer, extras) {
+      const list = [answer];
+      extras.forEach(item => {
+        if (!list.includes(item)) list.push(item);
+      });
+      let n = 1;
+      while (list.length < 4) {
+        const candidate = answer + n * (Math.random() > .5 ? 1 : -1);
+        if (!list.includes(candidate)) list.push(candidate);
+        n += 1;
+      }
+      return shuffle(list).map(String);
+    }
+
+    function q(text, answer, explain, tip, extras = []) {
+      return {
+        text,
+        answer: String(answer),
+        explain,
+        tip,
+        choices: uniqOptions(Number(answer), extras.map(Number))
+      };
+    }
+
+    function buildInteger(i) {
+      const a = rand(12, 89);
+      const b = rand(6, 48);
+      const c = rand(2, 9);
+      if (i % 3 === 0) {
+        const answer = a + b - c;
+        return q(`${a} + ${b} - ${c} = ?`, answer, `${a} + ${b} = ${a + b}，再减 ${c}，答案是 ${answer}。`, "加减混合从左到右算。", [answer + 2, answer - 3, a + b + c]);
+      }
+      if (i % 3 === 1) {
+        const answer = b * c + a;
+        return q(`${b} × ${c} + ${a} = ?`, answer, `先乘除后加减：${b} × ${c} = ${b * c}，再加 ${a}。`, "看到乘法时先算乘法。", [answer - a, answer + c, b + c + a]);
+      }
+      const answer = (a - b) * c;
+      return q(`(${a} - ${b}) × ${c} = ?`, answer, `先算括号：${a} - ${b} = ${a - b}，再乘 ${c}。`, "括号优先级最高。", [a - b * c, answer + c, answer - c]);
+    }
+
+    function buildSigned(i) {
+      const a = rand(3, 18);
+      const b = rand(2, 16);
+      if (i % 2 === 0) {
+        const answer = -a + b;
+        return q(`(-${a}) + ${b} = ?`, answer, `异号相加，用较大的绝对值减较小的绝对值，再看符号。`, "负数加正数，看谁的绝对值大。", [a + b, -(a + b), a - b]);
+      }
+      const answer = -a - b;
+      return q(`(-${a}) - ${b} = ?`, answer, `减去正数等于继续向负方向走：-${a} - ${b} = -${a + b}。`, "负数再减正数，结果更小。", [a - b, a + b, -a + b]);
+    }
+
+    function buildAbsolute(i) {
+      const a = rand(2, 20);
+      const b = rand(1, 12);
+      if (i % 2 === 0) {
+        return q(`|-${a}| = ?`, a, `绝对值是到 0 的距离，所以 |-${a}| = ${a}。`, "绝对值不看方向，只看距离。", [-a, a + 1, a - 1]);
+      }
+      const answer = Math.abs(-a + b);
+      return q(`数轴上点 A 表示 -${a}，点 B 表示 -${b}，AB 的距离是？`, answer, `距离 = |-${a} - (-${b})| = |${-a + b}| = ${answer}。`, "数轴两点距离用大数减小数，或用差的绝对值。", [a + b, Math.abs(a - b) + 1, answer + 2]);
+    }
+
+    function buildMixed(i) {
+      const a = rand(2, 9);
+      const b = rand(2, 8);
+      const c = rand(2, 6);
+      const answer = (a - b) * c - a;
+      return q(`(${a} - ${b}) × ${c} - ${a} = ?`, answer, `先括号：${a} - ${b} = ${a - b}；再乘 ${c}；最后减 ${a}，得 ${answer}。`, "负数参与混合运算时，每一步都写清楚。", [(a - b) * c + a, a - b * c - a, answer + c]);
+    }
+
+    function buildExpression(i) {
+      const x = rand(-5, 6) || 3;
+      const a = rand(2, 6);
+      const b = rand(1, 9);
+      const answer = a * x + b;
+      return q(`当 x = ${x} 时，${a}x + ${b} = ?`, answer, `把 x 换成 ${x}：${a} × (${x}) + ${b} = ${answer}。`, "负数代入字母时加括号，少丢符号。", [a + x + b, a * x - b, answer + a]);
+    }
+
+    function buildEquation(i) {
+      const x = rand(2, 12);
+      const a = rand(2, 6);
+      const b = rand(1, 15);
+      const c = a * x + b;
+      return q(`解方程：${a}x + ${b} = ${c}，x = ?`, x, `两边先减 ${b}：${a}x = ${c - b}；再除以 ${a}，x = ${x}。`, "移项变号，最后系数化为 1。", [x + 1, x - 1, c - b]);
+    }
+
+    function buildPercent(i) {
+      const total = rand(6, 18) * 10;
+      const rate = [10, 20, 25, 30, 40, 50][rand(0, 5)];
+      const answer = total * rate / 100;
+      return q(`${total} 的 ${rate}% 是多少？`, answer, `${rate}% = ${rate / 100}，${total} × ${rate / 100} = ${answer}。`, "百分数可以先化成小数。", [answer + 5, total - answer, answer * 2]);
+    }
+
+    function buildGeometry(i) {
+      const length = rand(5, 16);
+      const width = rand(3, 10);
+      if (i % 2 === 0) {
+        const answer = 2 * (length + width);
+        return q(`长方形长 ${length} cm，宽 ${width} cm，周长是多少 cm？`, answer, `长方形周长 = 2 × (长 + 宽) = 2 × (${length} + ${width}) = ${answer}。`, "周长围一圈，长和宽各有两条。", [length * width, length + width, answer + 2]);
+      }
+      const answer = length * width;
+      return q(`长方形长 ${length} cm，宽 ${width} cm，面积是多少 cm²？`, answer, `长方形面积 = 长 × 宽 = ${length} × ${width} = ${answer}。`, "面积看铺满多少格，用长乘宽。", [2 * (length + width), answer + length, answer - width]);
+    }
+
+    function buildAngle(i) {
+      const a = rand(25, 145);
+      if (i % 2 === 0) {
+        const answer = 180 - a;
+        return q(`两个角组成一个平角，其中一个角是 ${a}°，另一个角是多少度？`, answer, `平角是 180°，所以另一个角 = 180° - ${a}° = ${answer}°。`, "看到一条直线上的两个角，想到 180°。", [90 - a, a, answer + 10]);
+      }
+      const answer = 90 - rand(20, 70);
+      const known = 90 - answer;
+      return q(`两个角组成一个直角，其中一个角是 ${known}°，另一个角是多少度？`, answer, `直角是 90°，另一个角 = 90° - ${known}° = ${answer}°。`, "直角总和是 90°。", [180 - known, known, answer + 5]);
+    }
+
+    function buildWordProblem(i) {
+      if (i % 2 === 0) {
+        const price = rand(4, 12);
+        const count = rand(3, 9);
+        const pay = price * count + rand(2, 8);
+        const answer = pay - price * count;
+        return q(`一本练习本 ${price} 元，买 ${count} 本，付 ${pay} 元，应找回多少元？`, answer, `先算花了 ${price} × ${count} = ${price * count} 元，再用 ${pay} - ${price * count} = ${answer} 元。`, "购物题先算总价，再算找零。", [price * count, pay + price * count, answer + price]);
+      }
+      const speed = rand(40, 80);
+      const time = rand(2, 5);
+      const answer = speed * time;
+      return q(`汽车每小时行 ${speed} 千米，行驶 ${time} 小时，共行多少千米？`, answer, `路程 = 速度 × 时间 = ${speed} × ${time} = ${answer} 千米。`, "行程问题记住：路程 = 速度 × 时间。", [speed + time, speed * (time + 1), answer - speed]);
+    }
+
+    function createQuestions(levelIndex) {
+      return Array.from({ length: 10 }, (_, index) => levels[levelIndex].build(index));
+    }
+
+    function renderLevels() {
+      els.levelList.innerHTML = "";
+      levels.forEach((level, index) => {
+        const button = document.createElement("button");
+        button.className = "level-btn" + (index === game.levelIndex ? " active" : "");
+        button.disabled = index >= state.unlocked;
+        const stars = state.completed[index]?.stars || 0;
+        button.innerHTML = `<span>第 ${index + 1} 关 ${level.name}</span><span class="badge ${button.disabled ? "lock" : ""}">${button.disabled ? "锁" : "★".repeat(stars) || "开"}</span>`;
+        button.addEventListener("click", () => startLevel(index));
+        els.levelList.appendChild(button);
+      });
+    }
+
+    function renderStats() {
+      const totalCorrect = Object.values(state.completed).reduce((sum, item) => sum + item.correct, 0);
+      const totalStars = Object.values(state.completed).reduce((sum, item) => sum + item.stars, 0);
+      els.totalCorrect.textContent = totalCorrect;
+      els.bestStreak.textContent = state.bestStreak || 0;
+      els.mistakeCount.textContent = Object.keys(state.mistakes || {}).length;
+      els.stars.textContent = totalStars;
+    }
+
+    function startLevel(index) {
+      game.levelIndex = index;
+      game.questionIndex = 0;
+      game.questions = createQuestions(index);
+      game.score = 0;
+      game.streak = 0;
+      game.selected = false;
+      game.roundMistakes = [];
+      els.result.classList.remove("show");
+      els.game.classList.remove("hidden");
+      renderLevels();
+      renderStats();
+      renderQuestion();
+      saveState();
+    }
+
+    function renderQuestion() {
+      const level = levels[game.levelIndex];
+      const question = game.questions[game.questionIndex];
+      game.selected = false;
+      els.levelName.textContent = `第 ${game.levelIndex + 1} 关：${level.name}`;
+      els.streak.textContent = `连胜 ${game.streak}`;
+      els.score.textContent = `本关 ${game.score} 分`;
+      els.counter.textContent = `${game.questionIndex + 1} / ${game.questions.length}`;
+      els.progressBar.style.width = `${(game.questionIndex / game.questions.length) * 100}%`;
+      els.questionText.textContent = question.text;
+      els.scratch.innerHTML = "<strong>下笔前：</strong>先判断这题考的是计算、公式还是等量关系。";
+      els.nextBtn.disabled = true;
+      renderChoices(question);
+    }
+
+    function renderChoices(question) {
+      els.choices.innerHTML = "";
+      question.choices.forEach((choice, index) => {
+        const button = document.createElement("button");
+        button.className = "choice";
+        button.innerHTML = `<span class="letter">${String.fromCharCode(65 + index)}</span><span class="formula">${choice}</span>`;
+        button.addEventListener("click", () => choose(button, choice, question));
+        els.choices.appendChild(button);
+      });
+    }
+
+    function choose(button, choice, question) {
+      if (game.selected) return;
+      game.selected = true;
+      const isRight = choice === question.answer;
+      [...els.choices.children].forEach(child => {
+        child.disabled = true;
+        if (child.textContent.trim().endsWith(question.answer)) child.classList.add("correct");
+      });
+
+      if (isRight) {
+        game.score += 10;
+        game.streak += 1;
+        state.bestStreak = Math.max(state.bestStreak || 0, game.streak);
+        delete state.mistakes[question.text];
+        button.classList.add("correct");
+        els.scratch.innerHTML = `<strong>答对：</strong>${question.explain}`;
+      } else {
+        game.streak = 0;
+        state.mistakes[question.text] = question;
+        game.roundMistakes.push(question);
+        button.classList.add("wrong");
+        els.scratch.innerHTML = `<strong>错题解析：</strong>${question.explain}`;
+      }
+
+      els.streak.textContent = `连胜 ${game.streak}`;
+      els.score.textContent = `本关 ${game.score} 分`;
+      els.nextBtn.disabled = false;
+      renderStats();
+      saveState();
+    }
+
+    function nextQuestion() {
+      if (game.questionIndex < game.questions.length - 1) {
+        game.questionIndex += 1;
+        renderQuestion();
+        return;
+      }
+      finishLevel();
+    }
+
+    function finishLevel() {
+      const correct = Math.round(game.score / 10);
+      const stars = correct >= 9 ? 3 : correct >= 7 ? 2 : correct >= 5 ? 1 : 0;
+      state.completed[game.levelIndex] = { correct, stars };
+      recordStudy(correct, stars);
+      if (correct >= 7 && game.levelIndex + 1 < levels.length) {
+        state.unlocked = Math.max(state.unlocked, game.levelIndex + 2);
+      }
+      els.progressBar.style.width = "100%";
+      els.game.classList.add("hidden");
+      els.result.classList.add("show");
+      els.resultTitle.textContent = correct >= 7 ? "闯关成功" : "本关需要再练";
+      els.resultText.textContent = `答对 ${correct}/10，获得 ${stars} 颗星。${correct >= 7 ? "下一关已解锁。" : "答对 7 题以上即可解锁下一关。"}`;
+      renderReview();
+      els.continueBtn.disabled = !(correct >= 7 && game.levelIndex + 1 < levels.length);
+      renderLevels();
+      renderStats();
+      saveState();
+    }
+
+    function renderReview() {
+      const items = game.roundMistakes.length ? game.roundMistakes : game.questions.slice(0, 3);
+      els.reviewList.innerHTML = "";
+      items.forEach(item => {
+        const row = document.createElement("div");
+        row.className = "review-item";
+        row.innerHTML = `<b>${item.text}</b><span>答案：<span class="formula">${item.answer}</span><br>${item.explain}</span>`;
+        els.reviewList.appendChild(row);
+      });
+    }
+
+    els.showTipBtn.addEventListener("click", () => {
+      const question = game.questions[game.questionIndex];
+      els.scratch.innerHTML = `<strong>提示：</strong>${question.tip}`;
+    });
+    els.parentBtn.addEventListener("click", () => {
+      window.location.href = "parent-check.html";
+    });
+    els.nextBtn.addEventListener("click", nextQuestion);
+    els.retryBtn.addEventListener("click", () => startLevel(game.levelIndex));
+    els.continueBtn.addEventListener("click", () => startLevel(Math.min(game.levelIndex + 1, levels.length - 1)));
+    els.resetBtn.addEventListener("click", () => {
+      if (!confirm("确定要清空数学闯关进度吗？")) return;
+      localStorage.removeItem(storageKey);
+      Object.assign(state, baseState());
+      startLevel(0);
+    });
+
+    startLevel(Math.min(game.levelIndex, state.unlocked - 1));
+  </script>
+</body>
+</html>
