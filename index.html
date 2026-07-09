@@ -31,7 +31,8 @@
       letter-spacing: 0;
     }
 
-    button { cursor: pointer; font: inherit; }
+    button, input { font: inherit; }
+    button { cursor: pointer; }
     h1, h2, h3, p { margin: 0; }
 
     .app {
@@ -68,7 +69,7 @@
     h1 { font-size: 24px; line-height: 1.2; }
     .subtitle { margin-top: 4px; color: var(--muted); font-size: 14px; }
 
-    .icon-btn, .tab-btn, .primary, .secondary, .subject-btn, .unit-btn, .choice {
+    .icon-btn, .tab-btn, .primary, .secondary, .subject-btn, .unit-btn, .choice, .spelling-input {
       border-radius: 8px;
       transition: .16s ease;
     }
@@ -341,6 +342,41 @@
     .choice.wrong { border-color: var(--red); background: #fff0f0; }
     .choice:disabled { cursor: default; }
 
+    .word-display {
+      font-size: 46px;
+      line-height: 1.1;
+      font-weight: 900;
+      overflow-wrap: anywhere;
+    }
+
+    .phonetic {
+      color: var(--muted);
+      font-size: 15px;
+    }
+
+    .masked-word {
+      font-size: 42px;
+      line-height: 1.2;
+      font-weight: 900;
+      letter-spacing: 0;
+    }
+
+    .spelling-input {
+      width: 100%;
+      min-height: 50px;
+      border: 2px solid var(--line);
+      padding: 10px 12px;
+      color: var(--ink);
+      background: #fff;
+      font-weight: 800;
+    }
+
+    .spelling-input:focus {
+      outline: none;
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, .12);
+    }
+
     .feedback {
       min-height: 86px;
       border-left: 4px solid #0787a8;
@@ -464,6 +500,7 @@
         <div class="content">
           <nav class="tabs">
             <button class="tab-btn active" data-tab="learn">学习闯关</button>
+            <button class="tab-btn" data-tab="words">英语单词</button>
             <button class="tab-btn" data-tab="memory">必背清单</button>
             <button class="tab-btn" data-tab="exam">单元考试</button>
             <button class="tab-btn" data-tab="review">错题教导</button>
@@ -471,6 +508,7 @@
           </nav>
 
           <section class="view show" id="learnView"></section>
+          <section class="view" id="wordsView"></section>
           <section class="view" id="memoryView"></section>
           <section class="view" id="examView"></section>
           <section class="view" id="reviewView"></section>
@@ -595,6 +633,129 @@
       ]]
     ].map(([name, intro, units]) => ({ name, intro, units }));
 
+    const englishWordGroups = [
+      wordGroup("校园生活", [
+        vocab("school", "/skuːl/", "学校", "Our school is near the park."),
+        vocab("classroom", "/ˈklɑːsruːm/", "教室", "The classroom is bright and clean."),
+        vocab("teacher", "/ˈtiːtʃə(r)/", "老师", "Our English teacher is kind."),
+        vocab("student", "/ˈstjuːdnt/", "学生", "Every student has a new book."),
+        vocab("lesson", "/ˈlesn/", "课程；课", "The first lesson starts at eight."),
+        vocab("homework", "/ˈhəʊmwɜːk/", "家庭作业", "I finish my homework after dinner."),
+        vocab("subject", "/ˈsʌbdʒɪkt/", "学科", "Math is my favorite subject."),
+        vocab("library", "/ˈlaɪbrəri/", "图书馆", "We read books in the library."),
+        vocab("exam", "/ɪɡˈzæm/", "考试", "The exam is next Monday."),
+        vocab("question", "/ˈkwestʃən/", "问题", "Can I ask a question?")
+      ]),
+      wordGroup("家庭朋友", [
+        vocab("family", "/ˈfæməli/", "家庭", "My family has four people."),
+        vocab("parent", "/ˈpeərənt/", "父亲或母亲", "A parent can help with planning."),
+        vocab("cousin", "/ˈkʌzn/", "堂兄弟姐妹；表兄弟姐妹", "My cousin lives in Hefei."),
+        vocab("friend", "/frend/", "朋友", "A good friend listens carefully."),
+        vocab("neighbor", "/ˈneɪbə(r)/", "邻居", "Our neighbor is very helpful."),
+        vocab("birthday", "/ˈbɜːθdeɪ/", "生日", "Her birthday is in July."),
+        vocab("photo", "/ˈfəʊtəʊ/", "照片", "This photo is from last year."),
+        vocab("address", "/əˈdres/", "地址", "Please write your address here."),
+        vocab("visit", "/ˈvɪzɪt/", "拜访；参观", "We visit grandparents on Sunday."),
+        vocab("together", "/təˈɡeðə(r)/", "一起", "We study together after school.")
+      ]),
+      wordGroup("日常行动", [
+        vocab("listen", "/ˈlɪsn/", "听", "Listen to the word again."),
+        vocab("speak", "/spiːk/", "说；讲", "Please speak English loudly."),
+        vocab("write", "/raɪt/", "写", "Write the answer in your notebook."),
+        vocab("read", "/riːd/", "读", "Read the story twice."),
+        vocab("learn", "/lɜːn/", "学习", "We learn something new every day."),
+        vocab("practice", "/ˈpræktɪs/", "练习", "Practice makes you faster."),
+        vocab("remember", "/rɪˈmembə(r)/", "记得", "Remember this useful sentence."),
+        vocab("forget", "/fəˈɡet/", "忘记", "Do not forget your notebook."),
+        vocab("answer", "/ˈɑːnsə(r)/", "回答；答案", "Choose the best answer."),
+        vocab("finish", "/ˈfɪnɪʃ/", "完成", "Finish the task before playing.")
+      ]),
+      wordGroup("时间日期", [
+        vocab("morning", "/ˈmɔːnɪŋ/", "早晨；上午", "I read English every morning."),
+        vocab("afternoon", "/ˌɑːftəˈnuːn/", "下午", "We play basketball in the afternoon."),
+        vocab("evening", "/ˈiːvnɪŋ/", "晚上", "I review words in the evening."),
+        vocab("minute", "/ˈmɪnɪt/", "分钟", "You have one minute."),
+        vocab("hour", "/ˈaʊə(r)/", "小时", "The lesson lasts one hour."),
+        vocab("week", "/wiːk/", "星期；周", "There are seven days in a week."),
+        vocab("month", "/mʌnθ/", "月份", "September is a busy month."),
+        vocab("year", "/jɪə(r)/", "年", "This year I will enter middle school."),
+        vocab("usually", "/ˈjuːʒuəli/", "通常", "I usually get up at seven."),
+        vocab("sometimes", "/ˈsʌmtaɪmz/", "有时", "Sometimes I study with a friend.")
+      ]),
+      wordGroup("食物健康", [
+        vocab("breakfast", "/ˈbrekfəst/", "早餐", "Breakfast gives us energy."),
+        vocab("vegetable", "/ˈvedʒtəbl/", "蔬菜", "A vegetable can be fresh and green."),
+        vocab("fruit", "/fruːt/", "水果", "Fruit is good for health."),
+        vocab("water", "/ˈwɔːtə(r)/", "水", "Drink more water after sports."),
+        vocab("healthy", "/ˈhelθi/", "健康的", "A healthy body helps learning."),
+        vocab("strong", "/strɒŋ/", "强壮的", "Exercise makes us strong."),
+        vocab("tired", "/ˈtaɪəd/", "疲劳的", "I feel tired after a long day."),
+        vocab("hungry", "/ˈhʌŋɡri/", "饥饿的", "I am hungry before lunch."),
+        vocab("delicious", "/dɪˈlɪʃəs/", "美味的", "The noodles are delicious."),
+        vocab("medicine", "/ˈmedsn/", "药", "Take the medicine on time.")
+      ]),
+      wordGroup("地点方向", [
+        vocab("city", "/ˈsɪti/", "城市", "Hefei is a beautiful city."),
+        vocab("street", "/striːt/", "街道", "The shop is across the street."),
+        vocab("station", "/ˈsteɪʃn/", "车站", "Meet me at the station."),
+        vocab("hospital", "/ˈhɒspɪtl/", "医院", "The hospital is next to the bank."),
+        vocab("museum", "/mjuˈziːəm/", "博物馆", "We visited a museum last week."),
+        vocab("between", "/bɪˈtwiːn/", "在……之间", "The desk is between two chairs."),
+        vocab("behind", "/bɪˈhaɪnd/", "在……后面", "The bag is behind the door."),
+        vocab("across", "/əˈkrɒs/", "横过；在对面", "Walk across the road carefully."),
+        vocab("near", "/nɪə(r)/", "在附近", "The library is near our school."),
+        vocab("outside", "/ˌaʊtˈsaɪd/", "在外面", "Wait outside the classroom.")
+      ]),
+      wordGroup("兴趣活动", [
+        vocab("music", "/ˈmjuːzɪk/", "音乐", "Music helps me relax."),
+        vocab("movie", "/ˈmuːvi/", "电影", "This movie is interesting."),
+        vocab("sport", "/spɔːt/", "运动", "Sport is good for students."),
+        vocab("basketball", "/ˈbɑːskɪtbɔːl/", "篮球", "He plays basketball well."),
+        vocab("travel", "/ˈtrævl/", "旅行", "We travel during the holiday."),
+        vocab("hobby", "/ˈhɒbi/", "爱好", "Reading is a quiet hobby."),
+        vocab("collect", "/kəˈlekt/", "收集", "Some students collect stamps."),
+        vocab("draw", "/drɔː/", "画", "She likes to draw after class."),
+        vocab("dance", "/dɑːns/", "跳舞", "They dance at the school show."),
+        vocab("club", "/klʌb/", "俱乐部；社团", "Join a club you really like.")
+      ]),
+      wordGroup("性格感受", [
+        vocab("happy", "/ˈhæpi/", "高兴的", "I feel happy when I learn well."),
+        vocab("nervous", "/ˈnɜːvəs/", "紧张的", "It is normal to feel nervous."),
+        vocab("careful", "/ˈkeəfl/", "仔细的", "Be careful with signs in math."),
+        vocab("brave", "/breɪv/", "勇敢的", "Be brave and try again."),
+        vocab("quiet", "/ˈkwaɪət/", "安静的", "The room is quiet now."),
+        vocab("friendly", "/ˈfrendli/", "友好的", "Our classmates are friendly."),
+        vocab("different", "/ˈdɪfrənt/", "不同的", "Middle school feels different."),
+        vocab("important", "/ɪmˈpɔːtnt/", "重要的", "Good habits are important."),
+        vocab("interesting", "/ˈɪntrəstɪŋ/", "有趣的", "The story is interesting."),
+        vocab("difficult", "/ˈdɪfɪkəlt/", "困难的", "This word is difficult but useful.")
+      ]),
+      wordGroup("自然世界", [
+        vocab("weather", "/ˈweðə(r)/", "天气", "The weather changes quickly."),
+        vocab("season", "/ˈsiːzn/", "季节", "Spring is my favorite season."),
+        vocab("summer", "/ˈsʌmə(r)/", "夏天", "Summer is hot in Hefei."),
+        vocab("winter", "/ˈwɪntə(r)/", "冬天", "Winter can be cold."),
+        vocab("river", "/ˈrɪvə(r)/", "河流", "A river runs through the town."),
+        vocab("mountain", "/ˈmaʊntən/", "山", "The mountain looks high."),
+        vocab("forest", "/ˈfɒrɪst/", "森林", "The forest is quiet and green."),
+        vocab("earth", "/ɜːθ/", "地球；土地", "The earth is our home."),
+        vocab("nature", "/ˈneɪtʃə(r)/", "自然", "Nature gives us many lessons."),
+        vocab("protect", "/prəˈtekt/", "保护", "We should protect the environment.")
+      ]),
+      wordGroup("学习进阶", [
+        vocab("plan", "/plæn/", "计划", "Make a plan before you study."),
+        vocab("goal", "/ɡəʊl/", "目标", "Set a small goal every day."),
+        vocab("habit", "/ˈhæbɪt/", "习惯", "A good habit saves time."),
+        vocab("mistake", "/mɪˈsteɪk/", "错误", "A mistake can teach you a lot."),
+        vocab("improve", "/ɪmˈpruːv/", "提高；改善", "You can improve by reviewing."),
+        vocab("prepare", "/prɪˈpeə(r)/", "准备", "Prepare your books tonight."),
+        vocab("review", "/rɪˈvjuː/", "复习", "Review the words before sleep."),
+        vocab("example", "/ɪɡˈzɑːmpl/", "例子", "Give an example in your answer."),
+        vocab("sentence", "/ˈsentəns/", "句子", "Make a sentence with this word."),
+        vocab("success", "/səkˈses/", "成功", "Success comes from small steps.")
+      ])
+    ];
+
     const memoryBank = [
       [
         memo("古诗文", "记叙文六要素", "时间、地点、人物、起因、经过、结果。", "背的时候配一个自己熟悉的故事，六要素就不容易漏。"),
@@ -664,16 +825,18 @@
     function unit(name, points, cards) { return { name, points, cards }; }
     function card(q, a, wrong, explain) { return { q, a, wrong, explain }; }
     function memo(group, title, content, tip) { return { group, title, content, tip }; }
+    function wordGroup(name, words) { return { name, words }; }
+    function vocab(word, phonetic, meaning, sentence) { return { word, phonetic, meaning, sentence }; }
 
     const state = loadState();
     const app = { subject: state.currentSubject || 0, unit: state.currentUnit || 0, tab: "learn", mode: null, index: 0, questions: [], score: 0, mistakes: [], selected: false };
     const els = {
       subjectList: document.querySelector("#subjectList"), unitList: document.querySelector("#unitList"), heroTitle: document.querySelector("#heroTitle"), heroText: document.querySelector("#heroText"),
-      learnView: document.querySelector("#learnView"), memoryView: document.querySelector("#memoryView"), examView: document.querySelector("#examView"), reviewView: document.querySelector("#reviewView"), parentView: document.querySelector("#parentView"),
+      learnView: document.querySelector("#learnView"), wordsView: document.querySelector("#wordsView"), memoryView: document.querySelector("#memoryView"), examView: document.querySelector("#examView"), reviewView: document.querySelector("#reviewView"), parentView: document.querySelector("#parentView"),
       todayCount: document.querySelector("#todayCount"), weekCount: document.querySelector("#weekCount"), examCount: document.querySelector("#examCount"), mistakeCount: document.querySelector("#mistakeCount")
     };
 
-    function baseState() { return { currentSubject: 0, currentUnit: 0, completed: {}, exams: {}, memory: {}, mistakes: [], history: [] }; }
+    function baseState() { return { currentSubject: 0, currentUnit: 0, completed: {}, exams: {}, memory: {}, words: {}, mistakes: [], history: [] }; }
     function loadState() { try { return JSON.parse(localStorage.getItem(storageKey)) || baseState(); } catch { return baseState(); } }
     function saveState() { state.currentSubject = app.subject; state.currentUnit = app.unit; localStorage.setItem(storageKey, JSON.stringify(state)); }
     function todayKey(offset = 0) { const d = new Date(); d.setDate(d.getDate() + offset); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`; }
@@ -725,6 +888,7 @@
       document.querySelectorAll(".view").forEach(view => view.classList.remove("show"));
       document.querySelector(`#${app.tab}View`).classList.add("show");
       if (app.tab === "learn") renderLearn();
+      if (app.tab === "words") renderWords();
       if (app.tab === "memory") renderMemory();
       if (app.tab === "exam") renderExam();
       if (app.tab === "review") renderReview();
@@ -743,6 +907,231 @@
           </div>
         </div>`;
       document.querySelector("#startLearn").addEventListener("click", () => startRun("学习闯关", u.cards));
+    }
+
+    function renderWords() {
+      const englishIndex = subjects.findIndex(subject => subject.name === "英语");
+      if (app.subject !== englishIndex) {
+        els.wordsView.innerHTML = `
+          <div class="unit-card">
+            <h3>英语单词闯关</h3>
+            <p class="muted">这个模块专门练初中英语高频词。先切到英语科目，再开始百词斩式闯关。</p>
+            <div class="controls">
+              <span class="muted">认词 + 拼写补全，完成后会进入家长检查。</span>
+              <button class="primary" id="chooseEnglish">切到英语</button>
+            </div>
+          </div>`;
+        document.querySelector("#chooseEnglish").addEventListener("click", () => { app.subject = englishIndex; app.unit = 0; app.tab = "words"; render(); });
+        return;
+      }
+
+      state.words ||= {};
+      const completed = englishWordGroups.filter((_, index) => state.words[wordGroupKey(index)]).length;
+      els.wordsView.innerHTML = `
+        <div class="unit-card">
+          <h3>英语 · 百词斩闯关</h3>
+          <p class="muted">每关 10 个词：先看英文选中文，再进入拼写补全。拼写题会把单词中间挖空，要求输入完整单词。</p>
+          <div class="knowledge">
+            <div class="point"><strong>词库进度：</strong>${completed}/${englishWordGroups.length} 关完成</div>
+            <div class="point"><strong>训练目标：</strong>不只认得意思，还要能拼出单词。</div>
+          </div>
+        </div>
+        <div class="memory-grid">
+          ${englishWordGroups.map((group, index) => {
+            const done = state.words[wordGroupKey(index)];
+            return `<div class="memory-card ${done ? "done" : ""}">
+              <span class="tag">第 ${index + 1} 关</span>
+              <h3>${group.name}</h3>
+              <div class="memory-content">${group.words.slice(0, 5).map(item => item.word).join(" · ")}...</div>
+              <p class="muted">${done ? `上次成绩：${done.correct}/${done.total}，星星 ${"★".repeat(done.stars) || "0"}` : "完成认词和拼写后才算通关。"}</p>
+              <button class="primary" data-word-group="${index}">${done ? "再练一遍" : "开始闯关"}</button>
+            </div>`;
+          }).join("")}
+        </div>`;
+      els.wordsView.querySelectorAll("[data-word-group]").forEach(btn => btn.addEventListener("click", () => startWordMeaning(Number(btn.dataset.wordGroup))));
+    }
+
+    function wordGroupKey(index) {
+      return `english-word-${index}`;
+    }
+
+    function allMeanings() {
+      return englishWordGroups.flatMap(group => group.words.map(item => item.meaning));
+    }
+
+    function meaningChoices(correct) {
+      const wrong = shuffle(allMeanings().filter(item => item !== correct)).slice(0, 3);
+      return shuffle([correct, ...wrong]);
+    }
+
+    function startWordMeaning(groupIndex) {
+      app.mode = "英语单词认词";
+      app.wordGroup = groupIndex;
+      app.index = 0;
+      app.questions = englishWordGroups[groupIndex].words;
+      app.score = 0;
+      app.meaningScore = 0;
+      app.spellingScore = 0;
+      app.mistakes = [];
+      app.selected = false;
+      renderWordMeaningQuestion();
+    }
+
+    function renderWordMeaningQuestion() {
+      const item = app.questions[app.index];
+      app.selected = false;
+      els.wordsView.innerHTML = `<div class="play">
+        <div class="meter-row"><div class="progress"><span id="bar"></span></div><div class="counter" id="counter"></div></div>
+        <div class="lesson-card">
+          <div class="meta"><span class="pill">英语单词</span><span class="pill">${englishWordGroups[app.wordGroup].name}</span><span class="pill">认词</span></div>
+          <div class="word-display">${item.word}</div>
+          <div class="phonetic">${item.phonetic}</div>
+          <div class="teach">${item.sentence}</div>
+        </div>
+        <div class="choices" id="choices"></div>
+        <div class="feedback" id="feedback"><strong>先认词：</strong>选出这个单词的中文意思。</div>
+        <div class="controls"><span class="muted">认词结束后会自动进入拼写补全。</span><button class="primary" id="nextBtn" disabled>下一词</button></div>
+      </div>`;
+      document.querySelector("#bar").style.width = `${(app.index / app.questions.length) * 100}%`;
+      document.querySelector("#counter").textContent = `${app.index + 1} / ${app.questions.length}`;
+      const choices = document.querySelector("#choices");
+      choices.innerHTML = "";
+      meaningChoices(item.meaning).forEach((choice, index) => {
+        const button = document.createElement("button");
+        button.className = "choice";
+        button.innerHTML = `<span class="letter">${String.fromCharCode(65 + index)}</span><span>${choice}</span>`;
+        button.addEventListener("click", () => chooseWordMeaning(button, choice, item));
+        choices.appendChild(button);
+      });
+      document.querySelector("#nextBtn").addEventListener("click", nextWordMeaning);
+    }
+
+    function chooseWordMeaning(button, choice, item) {
+      if (app.selected) return;
+      app.selected = true;
+      const ok = choice === item.meaning;
+      document.querySelectorAll(".choice").forEach(node => { node.disabled = true; if (node.textContent.includes(item.meaning)) node.classList.add("correct"); });
+      if (ok) {
+        app.score += 1;
+        app.meaningScore += 1;
+        button.classList.add("correct");
+        document.querySelector("#feedback").innerHTML = `<strong>认对了：</strong>${item.word} = ${item.meaning}<br>${item.sentence}`;
+      } else {
+        button.classList.add("wrong");
+        app.mistakes.push({ id: `${Date.now()}-${Math.random()}`, subject: "英语", unit: "英语单词", q: `${item.word} 的中文意思`, a: item.meaning, explain: item.sentence });
+        document.querySelector("#feedback").innerHTML = `<strong>记一下：</strong>${item.word} 的意思是“${item.meaning}”。<br>${item.sentence}`;
+      }
+      document.querySelector("#nextBtn").disabled = false;
+    }
+
+    function nextWordMeaning() {
+      if (app.index < app.questions.length - 1) { app.index += 1; renderWordMeaningQuestion(); return; }
+      els.wordsView.innerHTML = `<div class="unit-card">
+        <h3>认词完成</h3>
+        <p>认词答对 ${app.meaningScore}/${app.questions.length}。下一步补全单词拼写，看看是不是只认得意思，也能写得出来。</p>
+        <div class="controls">
+          <button class="secondary" id="backWords">回到词库</button>
+          <button class="primary" id="startSpelling">进入拼写补全</button>
+        </div>
+      </div>`;
+      document.querySelector("#backWords").addEventListener("click", renderWords);
+      document.querySelector("#startSpelling").addEventListener("click", () => startWordSpelling(app.wordGroup));
+    }
+
+    function startWordSpelling(groupIndex) {
+      app.mode = "英语单词拼写";
+      app.wordGroup = groupIndex;
+      app.index = 0;
+      app.questions = shuffle(englishWordGroups[groupIndex].words);
+      app.spellingScore = 0;
+      app.selected = false;
+      renderSpellingQuestion();
+    }
+
+    function maskWord(word) {
+      const chars = word.split("");
+      if (chars.length <= 3) {
+        chars[Math.floor(chars.length / 2)] = "_";
+        return chars.join("");
+      }
+      const positions = chars.length <= 6
+        ? [Math.floor(chars.length / 2)]
+        : [Math.floor(chars.length / 3), Math.floor(chars.length * 2 / 3)];
+      positions.forEach(position => { chars[position] = "_"; });
+      return chars.join("");
+    }
+
+    function renderSpellingQuestion() {
+      const item = app.questions[app.index];
+      app.selected = false;
+      els.wordsView.innerHTML = `<div class="play">
+        <div class="meter-row"><div class="progress"><span id="bar"></span></div><div class="counter" id="counter"></div></div>
+        <div class="lesson-card">
+          <div class="meta"><span class="pill">英语单词</span><span class="pill">${englishWordGroups[app.wordGroup].name}</span><span class="pill">拼写补全</span></div>
+          <div class="masked-word">${maskWord(item.word)}</div>
+          <div class="teach">中文：${item.meaning}<br>${item.sentence}</div>
+          <input class="spelling-input" id="spellingInput" autocomplete="off" autocapitalize="none" placeholder="输入完整英文单词">
+        </div>
+        <div class="feedback" id="feedback"><strong>拼写：</strong>根据缺失字母和中文意思，输入完整单词。</div>
+        <div class="controls"><button class="secondary" id="showAnswerBtn">看答案</button><button class="primary" id="checkSpellingBtn">提交</button></div>
+      </div>`;
+      document.querySelector("#bar").style.width = `${(app.index / app.questions.length) * 100}%`;
+      document.querySelector("#counter").textContent = `${app.index + 1} / ${app.questions.length}`;
+      const input = document.querySelector("#spellingInput");
+      input.focus();
+      input.addEventListener("keydown", event => { if (event.key === "Enter") checkSpelling(false); });
+      document.querySelector("#checkSpellingBtn").onclick = () => checkSpelling(false);
+      document.querySelector("#showAnswerBtn").onclick = () => checkSpelling(true);
+    }
+
+    function cleanWord(text) {
+      return text.trim().toLowerCase().replace(/[^a-z]/g, "");
+    }
+
+    function checkSpelling(giveUp) {
+      if (app.selected) return;
+      app.selected = true;
+      const item = app.questions[app.index];
+      const input = document.querySelector("#spellingInput");
+      const ok = !giveUp && cleanWord(input.value) === item.word.toLowerCase();
+      if (ok) {
+        app.score += 1;
+        app.spellingScore += 1;
+        document.querySelector("#feedback").innerHTML = `<strong>拼对了：</strong>${item.word} = ${item.meaning}`;
+      } else {
+        app.mistakes.push({ id: `${Date.now()}-${Math.random()}`, subject: "英语", unit: "英语单词拼写", q: `${maskWord(item.word)} 补全单词`, a: item.word, explain: `${item.word} = ${item.meaning}。${item.sentence}` });
+        document.querySelector("#feedback").innerHTML = `<strong>${giveUp ? "答案：" : "拼写要复习："}</strong>${item.word} = ${item.meaning}<br>${item.sentence}`;
+      }
+      document.querySelector("#checkSpellingBtn").textContent = app.index < app.questions.length - 1 ? "下一词" : "完成本关";
+      document.querySelector("#showAnswerBtn").style.display = "none";
+      document.querySelector("#checkSpellingBtn").onclick = nextSpellingQuestion;
+      input.disabled = true;
+    }
+
+    function nextSpellingQuestion() {
+      if (app.index < app.questions.length - 1) { app.index += 1; renderSpellingQuestion(); return; }
+      finishWordGame();
+    }
+
+    function finishWordGame() {
+      const group = englishWordGroups[app.wordGroup];
+      const total = group.words.length * 2;
+      const correct = app.meaningScore + app.spellingScore;
+      const stars = correct >= 18 ? 3 : correct >= 14 ? 2 : correct >= 10 ? 1 : 0;
+      state.words ||= {};
+      state.words[wordGroupKey(app.wordGroup)] = { correct, total, stars, date: todayKey() };
+      state.mistakes.push(...app.mistakes);
+      addHistory("英语单词闯关", "英语", group.name, correct, total, app.mistakes.map(m => m.q).slice(0, 8), stars);
+      els.wordsView.innerHTML = `<div class="unit-card">
+        <h3>${group.name} 完成</h3>
+        <p>认词 ${app.meaningScore}/${group.words.length}，拼写 ${app.spellingScore}/${group.words.length}，总分 ${correct}/${total}，星星 ${"★".repeat(stars) || "0"}。</p>
+        <div class="review-list">${(app.mistakes.length ? app.mistakes : group.words.slice(0, 3)).map(item => `<div class="record"><strong>${item.q || item.word}</strong>${item.a ? `答案：${item.a}<br>${item.explain}` : `${item.meaning}<br>${item.sentence}`}</div>`).join("")}</div>
+        <div class="controls"><button class="secondary" id="backWords">回到词库</button><button class="primary" id="goReview">查看错题教导</button></div>
+      </div>`;
+      document.querySelector("#backWords").addEventListener("click", renderWords);
+      document.querySelector("#goReview").addEventListener("click", () => { app.tab = "review"; render(); });
+      saveState();
+      renderStats();
     }
 
     function memoryItems() {
