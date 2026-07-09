@@ -210,7 +210,7 @@
 
     .view.show { display: grid; }
 
-    .unit-card, .lesson-card, .exam-card, .record {
+    .unit-card, .lesson-card, .exam-card, .record, .memory-card {
       border: 1px solid var(--line);
       border-radius: 8px;
       background: #fff;
@@ -227,6 +227,32 @@
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 10px;
+    }
+
+    .memory-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .memory-card {
+      display: grid;
+      gap: 10px;
+      align-content: start;
+    }
+
+    .memory-card.done {
+      border-color: var(--green);
+      background: #f0fbf6;
+    }
+
+    .memory-content {
+      border-left: 4px solid var(--green);
+      border-radius: 8px;
+      background: var(--paper);
+      padding: 10px 12px;
+      line-height: 1.65;
+      white-space: pre-line;
     }
 
     .point {
@@ -352,6 +378,7 @@
     }
 
     .tag.exam { background: var(--red); }
+    .tag.memory { background: var(--green); }
     .tag.review { background: var(--amber); }
     .empty { border: 1px dashed var(--line); border-radius: 8px; padding: 16px; color: var(--muted); background: var(--paper); line-height: 1.7; }
     footer { text-align: center; color: var(--muted); font-size: 12px; padding-bottom: 4px; }
@@ -366,7 +393,7 @@
       .hero { min-height: 260px; }
       .hero h2 { font-size: 28px; }
       .scene svg { max-width: 210px; margin: 0 auto; }
-      .knowledge, .choices { grid-template-columns: 1fr; }
+      .knowledge, .choices, .memory-grid { grid-template-columns: 1fr; }
       .question { font-size: 23px; }
     }
   </style>
@@ -437,12 +464,14 @@
         <div class="content">
           <nav class="tabs">
             <button class="tab-btn active" data-tab="learn">学习闯关</button>
+            <button class="tab-btn" data-tab="memory">必背清单</button>
             <button class="tab-btn" data-tab="exam">单元考试</button>
             <button class="tab-btn" data-tab="review">错题教导</button>
             <button class="tab-btn" data-tab="parent">家长检查</button>
           </nav>
 
           <section class="view show" id="learnView"></section>
+          <section class="view" id="memoryView"></section>
           <section class="view" id="examView"></section>
           <section class="view" id="reviewView"></section>
           <section class="view" id="parentView"></section>
@@ -566,18 +595,85 @@
       ]]
     ].map(([name, intro, units]) => ({ name, intro, units }));
 
+    const memoryBank = [
+      [
+        memo("古诗文", "记叙文六要素", "时间、地点、人物、起因、经过、结果。", "背的时候配一个自己熟悉的故事，六要素就不容易漏。"),
+        memo("阅读", "修辞作用答题框架", "运用了某种修辞，生动形象地写出了对象的特点，表达了人物或作者的情感。", "不要只写“生动形象”，要补上写出了什么、表达了什么。"),
+        memo("作文", "人物描写五种方法", "外貌、语言、动作、神态、心理描写。", "写作文时至少抓住动作和语言，画面会更具体。"),
+        memo("文学常识", "表达方式五种", "记叙、描写、说明、议论、抒情。", "阅读题问表达方式时，不要和修辞手法混淆。"),
+        memo("文言文", "文言翻译原则", "信、达、雅；重点是字字落实，句子通顺。", "初中先做到关键词准确、句意通顺。")
+      ],
+      [
+        memo("有理数", "绝对值意义", "一个数的绝对值表示这个数到 0 的距离，距离不能为负。", "看到绝对值，先想到数轴距离。"),
+        memo("有理数", "加法法则", "同号相加取相同符号，并把绝对值相加；异号相加取绝对值较大数的符号，并用较大绝对值减较小绝对值。", "先定符号，再算数字。"),
+        memo("方程", "移项法则", "把项从等号一边移到另一边，要改变符号。", "加变减，减变加，乘除也要按等式性质处理。"),
+        memo("几何", "长方形公式", "周长 = 2 × (长 + 宽)；面积 = 长 × 宽。", "周长围一圈，面积铺一面。"),
+        memo("比例", "百分数互化", "百分数化小数：去掉百分号，小数点向左移动两位。", "25% = 0.25，50% = 0.5，75% = 0.75 要熟。")
+      ],
+      [
+        memo("单词", "初中高频学习词", "learn 学习；practice 练习；review 复习；prepare 准备；improve 提高。", "单词要放进句子里读，不要只盯中文意思。"),
+        memo("语法", "be 动词口诀", "我用 am，你用 are，is 连着他她它；单数 is，复数 are。", "口诀只是入口，造句才能真正会用。"),
+        memo("时态", "一般现在时", "表示经常性、习惯性动作；第三人称单数作主语时，动词常加 s 或 es。", "看到 always、usually、often，常想到一般现在时。"),
+        memo("句型", "一般疑问句", "含 be 动词时把 be 提前；实义动词句用 Do 或 Does 提问。", "Does 后面的动词用原形。"),
+        memo("写作", "自我介绍句型", "My name is ... I am ... years old. I like ... My favorite subject is ...", "先背稳基础句，再慢慢加细节。")
+      ],
+      [
+        memo("声学", "声音的产生", "声音是由物体振动产生的，声音传播需要介质。", "月球上不能直接对话，就是因为缺少空气传播声音。"),
+        memo("光学", "光的直线传播", "光在同种均匀介质中沿直线传播，影子、小孔成像、排队看齐都与它有关。", "把生活例子和概念绑定，物理会好记很多。"),
+        memo("运动", "速度公式", "速度 = 路程 ÷ 时间；v = s ÷ t。", "单位要统一，km/h 和 m/s 不要乱用。"),
+        memo("力学", "惯性", "物体具有保持原来运动状态不变的性质，这种性质叫惯性。", "惯性不是力，不能说“受到惯性”。"),
+        memo("密度", "密度公式", "密度 = 质量 ÷ 体积；ρ = m ÷ V。", "同种物质状态不变时，密度通常不变。")
+      ],
+      [
+        memo("变化", "物理变化和化学变化", "是否生成新物质，是判断物理变化和化学变化的关键。", "冰融化多为物理变化，铁生锈是化学变化。"),
+        memo("空气", "空气成分", "空气中氮气约占 78%，氧气约占 21%。", "含量最多的是氮气，不是氧气。"),
+        memo("氧气", "氧气性质", "氧气能支持燃烧，能使带火星的木条复燃。", "氧气支持燃烧，但氧气本身不等于可燃物。"),
+        memo("溶液", "溶液特点", "溶液具有均一性、稳定性，由溶质和溶剂组成。", "糖水中糖是溶质，水是溶剂。"),
+        memo("安全", "实验安全", "不能直接闻未知气体，不能品尝药品，加热试管口不能朝向人。", "化学第一课永远是安全。")
+      ],
+      [
+        memo("细胞", "细胞地位", "细胞是生物体结构和功能的基本单位。", "生物题看到结构和功能，常从细胞想起。"),
+        memo("显微镜", "观察顺序", "使用显微镜通常先低倍观察，再换高倍观察。", "先找目标，再看细节。"),
+        memo("植物细胞", "植物细胞特点", "植物细胞一般有细胞壁、液泡，绿色部分细胞有叶绿体。", "动物细胞没有细胞壁。"),
+        memo("营养", "小肠功能", "小肠是消化和吸收营养物质的主要场所。", "小肠长、有绒毛，适合吸收。"),
+        memo("生态", "生态系统组成", "生态系统由生物部分和非生物部分组成。", "阳光、水、空气属于非生物部分。")
+      ],
+      [
+        memo("方法", "历史四要素", "时间、地点、人物、事件。", "历史题先抓四要素，材料就不会散。"),
+        memo("证据", "史料分类", "实物史料、文献史料、口述史料等都可以帮助研究历史。", "文物是很重要的实物史料。"),
+        memo("时间", "朝代学习方法", "朝代要按时间线串起来，再记制度、经济、文化和人物。", "不要孤立背事件，要放进前后顺序。"),
+        memo("评价", "评价人物原则", "评价历史人物要结合时代背景，看主要贡献和局限。", "不要只用好人坏人简单判断。"),
+        memo("材料题", "材料题步骤", "先读问题，再找材料关键词，最后结合所学知识作答。", "关键词常藏着时间、原因、影响。")
+      ],
+      [
+        memo("地图", "地图三要素", "方向、比例尺、图例和注记。", "看地图先看三要素，不然容易读错。"),
+        memo("比例尺", "比例尺意义", "比例尺表示图上距离比实际距离缩小的程度。", "比例尺越大，表示范围通常越小，内容越详细。"),
+        memo("经纬网", "经纬网作用", "经纬网可以确定地球表面某一点的位置。", "经线指示南北，纬线指示东西。"),
+        memo("天气气候", "天气和气候区别", "天气是短时间的大气状况；气候是多年平均的大气状况。", "今天下雨是天气，合肥夏季炎热多雨是气候。"),
+        memo("地形", "等高线特点", "等高线密集坡陡，等高线稀疏坡缓。", "爬山路线题常考这个。")
+      ],
+      [
+        memo("成长", "中学新变化", "中学生活带来新课程、新老师、新同学和新要求。", "初中最重要的是自主学习和自我管理。"),
+        memo("学习", "学会学习", "学会学习需要发现并保持兴趣，掌握科学方法，善于运用不同学习方式。", "预习、听课、复习、错题整理是一套流程。"),
+        memo("友谊", "友谊原则", "友谊需要尊重、理解、信任，也需要原则和边界。", "真正的朋友不会要求你做错误的事。"),
+        memo("规则", "规则作用", "规则保障社会秩序，也保障人们的自由和权利。", "自由不是想做什么就做什么。"),
+        memo("法律", "法律特征", "法律由国家制定或认可，靠国家强制力保证实施，对全体社会成员具有普遍约束力。", "遇到欺凌或危险，要及时求助并保留证据。")
+      ]
+    ];
+
     function unit(name, points, cards) { return { name, points, cards }; }
     function card(q, a, wrong, explain) { return { q, a, wrong, explain }; }
+    function memo(group, title, content, tip) { return { group, title, content, tip }; }
 
     const state = loadState();
     const app = { subject: state.currentSubject || 0, unit: state.currentUnit || 0, tab: "learn", mode: null, index: 0, questions: [], score: 0, mistakes: [], selected: false };
     const els = {
       subjectList: document.querySelector("#subjectList"), unitList: document.querySelector("#unitList"), heroTitle: document.querySelector("#heroTitle"), heroText: document.querySelector("#heroText"),
-      learnView: document.querySelector("#learnView"), examView: document.querySelector("#examView"), reviewView: document.querySelector("#reviewView"), parentView: document.querySelector("#parentView"),
+      learnView: document.querySelector("#learnView"), memoryView: document.querySelector("#memoryView"), examView: document.querySelector("#examView"), reviewView: document.querySelector("#reviewView"), parentView: document.querySelector("#parentView"),
       todayCount: document.querySelector("#todayCount"), weekCount: document.querySelector("#weekCount"), examCount: document.querySelector("#examCount"), mistakeCount: document.querySelector("#mistakeCount")
     };
 
-    function baseState() { return { currentSubject: 0, currentUnit: 0, completed: {}, exams: {}, mistakes: [], history: [] }; }
+    function baseState() { return { currentSubject: 0, currentUnit: 0, completed: {}, exams: {}, memory: {}, mistakes: [], history: [] }; }
     function loadState() { try { return JSON.parse(localStorage.getItem(storageKey)) || baseState(); } catch { return baseState(); } }
     function saveState() { state.currentSubject = app.subject; state.currentUnit = app.unit; localStorage.setItem(storageKey, JSON.stringify(state)); }
     function todayKey(offset = 0) { const d = new Date(); d.setDate(d.getDate() + offset); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`; }
@@ -629,6 +725,7 @@
       document.querySelectorAll(".view").forEach(view => view.classList.remove("show"));
       document.querySelector(`#${app.tab}View`).classList.add("show");
       if (app.tab === "learn") renderLearn();
+      if (app.tab === "memory") renderMemory();
       if (app.tab === "exam") renderExam();
       if (app.tab === "review") renderReview();
       if (app.tab === "parent") renderParent();
@@ -646,6 +743,121 @@
           </div>
         </div>`;
       document.querySelector("#startLearn").addEventListener("click", () => startRun("学习闯关", u.cards));
+    }
+
+    function memoryItems() {
+      return memoryBank[app.subject] || [];
+    }
+
+    function memoryId(index) {
+      return `${app.subject}-${index}`;
+    }
+
+    function renderMemory() {
+      state.memory ||= {};
+      const items = memoryItems();
+      const doneCount = items.filter((_, index) => state.memory[memoryId(index)]).length;
+      els.memoryView.innerHTML = `
+        <div class="unit-card">
+          <h3>${currentSubject().name} · 必背清单</h3>
+          <p class="muted">这一页适合每天早晚各背 5 分钟。点“已背会”会进入家长检查；点“随机抽背”会检测是不是真的熟。</p>
+          <div class="knowledge">
+            <div class="point"><strong>本科学习：</strong>${doneCount}/${items.length} 条已背会</div>
+            <div class="point"><strong>建议方法：</strong>先读 2 遍，再遮住内容自己说出来。</div>
+          </div>
+          <div class="controls">
+            <span class="muted">背不熟的内容会自动进入“错题教导”。</span>
+            <button class="primary" id="startMemoryDrill">随机抽背 5 条</button>
+          </div>
+        </div>
+        <div class="memory-grid">
+          ${items.map((item, index) => `
+            <div class="memory-card ${state.memory[memoryId(index)] ? "done" : ""}">
+              <span class="tag">${item.group}</span>
+              <h3>${item.title}</h3>
+              <div class="memory-content">${item.content}</div>
+              <p class="muted">${item.tip}</p>
+              <button class="secondary" data-memory="${index}">${state.memory[memoryId(index)] ? "已背会" : "标记已背会"}</button>
+            </div>
+          `).join("")}
+        </div>`;
+      els.memoryView.querySelector("#startMemoryDrill").addEventListener("click", startMemoryDrill);
+      els.memoryView.querySelectorAll("[data-memory]").forEach(btn => btn.addEventListener("click", () => markMemory(Number(btn.dataset.memory))));
+    }
+
+    function markMemory(index) {
+      state.memory ||= {};
+      const item = memoryItems()[index];
+      const id = memoryId(index);
+      if (!state.memory[id]) {
+        state.memory[id] = { date: todayKey(), subject: currentSubject().name, title: item.title };
+        addHistory("必背打卡", currentSubject().name, item.group, 1, 1, [], 3);
+      }
+      render();
+    }
+
+    function startMemoryDrill() {
+      const items = shuffle(memoryItems().map((item, index) => ({ ...item, memoryIndex: index }))).slice(0, 5);
+      app.mode = "必背抽查"; app.index = 0; app.questions = items; app.score = 0; app.mistakes = []; app.selected = false;
+      els.memoryView.innerHTML = `<div class="play">
+        <div class="meter-row"><div class="progress"><span id="bar"></span></div><div class="counter" id="counter"></div></div>
+        <div class="lesson-card"><div class="meta"><span class="pill">${currentSubject().name}</span><span class="pill">必背抽查</span></div><p class="mission" id="mission"></p><div class="question" id="question"></div><div class="teach" id="teach"></div></div>
+        <div class="feedback" id="feedback"><strong>先别看答案：</strong>请先自己背出来，再点会不会。</div>
+        <div class="controls"><button class="secondary" id="unknownBtn">还不熟</button><button class="primary" id="knownBtn">我能背出</button></div>
+      </div>`;
+      renderMemoryQuestion();
+    }
+
+    function renderMemoryQuestion() {
+      const item = app.questions[app.index];
+      app.selected = false;
+      document.querySelector("#bar").style.width = `${(app.index / app.questions.length) * 100}%`;
+      document.querySelector("#counter").textContent = `${app.index + 1} / ${app.questions.length}`;
+      document.querySelector("#mission").textContent = item.group;
+      document.querySelector("#question").textContent = `请背出：${item.title}`;
+      document.querySelector("#teach").textContent = "先自己说一遍，再选择“我能背出”或“还不熟”。";
+      document.querySelector("#feedback").innerHTML = "<strong>先别看答案：</strong>请先自己背出来，再点会不会。";
+      document.querySelector("#knownBtn").onclick = () => checkMemory(true);
+      document.querySelector("#unknownBtn").onclick = () => checkMemory(false);
+    }
+
+    function checkMemory(known) {
+      if (app.selected) return;
+      app.selected = true;
+      const item = app.questions[app.index];
+      document.querySelector("#feedback").innerHTML = `<strong>${known ? "很好，继续保持：" : "这条要复习："}</strong>${item.content}<br>${item.tip}`;
+      if (known) {
+        app.score += 1;
+        state.memory ||= {};
+        state.memory[memoryId(item.memoryIndex)] = { date: todayKey(), subject: currentSubject().name, title: item.title };
+      } else {
+        app.mistakes.push({ id: `${Date.now()}-${Math.random()}`, subject: currentSubject().name, unit: "必背清单", q: item.title, a: item.content, explain: item.tip });
+      }
+      document.querySelector("#knownBtn").textContent = app.index < app.questions.length - 1 ? "下一条" : "完成抽背";
+      document.querySelector("#unknownBtn").style.display = "none";
+      document.querySelector("#knownBtn").onclick = nextMemoryQuestion;
+    }
+
+    function nextMemoryQuestion() {
+      if (app.index < app.questions.length - 1) { app.index += 1; renderMemoryQuestion(); return; }
+      finishMemoryDrill();
+    }
+
+    function finishMemoryDrill() {
+      const total = app.questions.length;
+      const stars = app.score >= 5 ? 3 : app.score >= 3 ? 2 : app.score >= 1 ? 1 : 0;
+      state.mistakes.push(...app.mistakes);
+      addHistory("必背抽查", currentSubject().name, "必背清单", app.score, total, app.mistakes.map(m => m.q), stars);
+      els.memoryView.innerHTML = `<div class="unit-card">
+        <h3>必背抽查完成</h3>
+        <p>背出 ${app.score}/${total} 条，获得 ${"★".repeat(stars) || "0"}。${app.mistakes.length ? "不熟的内容已进入“错题教导”。" : "本轮全部背出。"}</p>
+        <div class="review-list">${(app.mistakes.length ? app.mistakes : app.questions.slice(0, 2)).map(item => `<div class="record"><strong>${item.q || item.title}</strong>${item.a ? `答案：${item.a}<br>${item.explain}` : `${item.content}<br>${item.tip}`}</div>`).join("")}</div>
+        <div class="controls"><button class="secondary" id="backMemory">回到必背清单</button><button class="primary" id="goReview">查看错题教导</button></div>
+      </div>`;
+      document.querySelector("#backMemory").addEventListener("click", renderMemory);
+      document.querySelector("#goReview").addEventListener("click", () => { app.tab = "review"; render(); });
+      saveState();
+      renderStats();
     }
 
     function renderExam() {
@@ -688,6 +900,7 @@
             <div class="point"><strong>今天完成：</strong>${today.length} 次</div>
             <div class="point"><strong>7天完成：</strong>${weekRecords.length} 次</div>
             <div class="point"><strong>单元考试：</strong>${state.history.filter(r => r.type === "单元考试").length} 次</div>
+            <div class="point"><strong>必背记录：</strong>${state.history.filter(r => r.type && r.type.includes("必背")).length} 次</div>
             <div class="point"><strong>待复习错题：</strong>${state.mistakes.length} 题</div>
           </div>
         </div>
@@ -697,7 +910,8 @@
     }
 
     function recordHtml(r) {
-      return `<div class="record"><span class="tag ${r.type === "单元考试" ? "exam" : ""}">${r.type}</span><strong>${r.date} ${r.time} · ${r.subject} · ${r.unit}</strong>答对 ${r.correct}/${r.total}，星星 ${"★".repeat(r.stars || 0) || "0"}${r.mistakes.length ? `<br>错题：${r.mistakes.join("；")}` : "<br>错题：无"}</div>`;
+      const tagClass = r.type === "单元考试" ? "exam" : r.type && r.type.includes("必背") ? "memory" : "";
+      return `<div class="record"><span class="tag ${tagClass}">${r.type}</span><strong>${r.date} ${r.time} · ${r.subject} · ${r.unit}</strong>答对 ${r.correct}/${r.total}，星星 ${"★".repeat(r.stars || 0) || "0"}${r.mistakes.length ? `<br>错题：${r.mistakes.join("；")}` : "<br>错题：无"}</div>`;
     }
 
     function startRun(type, cards) {
